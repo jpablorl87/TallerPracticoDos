@@ -396,11 +396,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 1497433486}
   sceneRoot: {fileID: 48190755}
-  inventoryPanel: {fileID: 891025618}
-  miniOptionsPanel: {fileID: 898647883}
-  decorationPanel: {fileID: 1703938194}
-  inventoryPrefabs: []
-  decorationPrefabs: []
+  uiManager: {fileID: 1512960306}
+  inventoryPrefabs:
+  - {fileID: 2096143240159322331, guid: a404359deda5d664595ae436fe5d7537, type: 3}
+  decorationPrefabs:
+  - {fileID: 6050886689511979959, guid: 2c0c2e186046616469f4d290ced62036, type: 3}
 --- !u!4 &217998508
 Transform:
   m_ObjectHideFlags: 0
@@ -499,8 +499,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 217998507}
-        m_TargetAssemblyTypeName: InteractionController, Assembly-CSharp
+      - m_Target: {fileID: 1512960306}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
         m_MethodName: OpenInventory
         m_Mode: 1
         m_Arguments:
@@ -1081,7 +1081,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -200}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &517369345
@@ -2140,10 +2140,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minZoom: 2
-  maxZoom: 5
+  maxZoom: 10
   zoomSpeedMouse: 0.1
   zoomSpeedTouch: 0.05
-  panSpeed: 0.1
+  panSpeed: 0.005
   panLimitMin: {x: -10, y: -10}
   panLimitMax: {x: 10, y: 10}
   inputActionsAsset: {fileID: -944628639613478452, guid: 6d3901b727a430c4bb80c8a07ce4a33c, type: 3}
@@ -2182,7 +2182,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -2214,6 +2214,53 @@ Transform:
   - {fileID: 330585546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 20.551, y: -44.653, z: 0}
+--- !u!1 &1512960305
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1512960307}
+  - component: {fileID: 1512960306}
+  m_Layer: 0
+  m_Name: UIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1512960306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1512960305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 198436b847fe10e4487a5938d49c4f32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryPanel: {fileID: 891025618}
+  miniOptionsPanel: {fileID: 898647883}
+  decorationPanel: {fileID: 1703938194}
+--- !u!4 &1512960307
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1512960305}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1623933822
 GameObject:
   m_ObjectHideFlags: 0
@@ -2386,7 +2433,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -100}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1654507648
@@ -2839,3 +2886,4 @@ SceneRoots:
   - {fileID: 1497433487}
   - {fileID: 217998508}
   - {fileID: 724773398}
+  - {fileID: 1512960307}

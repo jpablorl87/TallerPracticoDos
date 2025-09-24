@@ -15,7 +15,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Drag",
+                    "name": "DragPosition",
                     "type": "Value",
                     "id": "d036e681-9e4a-4bf0-8f69-b60aeb9cf08e",
                     "expectedControlType": "Vector2",
@@ -31,6 +31,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "DragButton",
+                    "type": "Button",
+                    "id": "f8870c7a-cf6e-4d7b-9c1b-36b80b3fc8ce",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -63,7 +72,7 @@
                     "interactions": "Press",
                     "processors": "",
                     "groups": "",
-                    "action": "Drag",
+                    "action": "DragPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -74,7 +83,7 @@
                     "interactions": "Press",
                     "processors": "",
                     "groups": "",
-                    "action": "Drag",
+                    "action": "DragPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -86,6 +95,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ZoomMouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61b76fc8-4741-45a6-b9cf-99cb9688127c",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DragButton",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

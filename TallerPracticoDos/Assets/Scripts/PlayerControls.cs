@@ -101,7 +101,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Drag"",
+                    ""name"": ""DragPosition"",
                     ""type"": ""Value"",
                     ""id"": ""d036e681-9e4a-4bf0-8f69-b60aeb9cf08e"",
                     ""expectedControlType"": ""Vector2"",
@@ -117,6 +117,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""DragButton"",
+                    ""type"": ""Button"",
+                    ""id"": ""f8870c7a-cf6e-4d7b-9c1b-36b80b3fc8ce"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -149,7 +158,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Drag"",
+                    ""action"": ""DragPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -160,7 +169,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Drag"",
+                    ""action"": ""DragPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -174,6 +183,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""ZoomMouse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""61b76fc8-4741-45a6-b9cf-99cb9688127c"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DragButton"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -183,8 +203,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         // Gameplay
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
         m_Gameplay_Tap = m_Gameplay.FindAction("Tap", throwIfNotFound: true);
-        m_Gameplay_Drag = m_Gameplay.FindAction("Drag", throwIfNotFound: true);
+        m_Gameplay_DragPosition = m_Gameplay.FindAction("DragPosition", throwIfNotFound: true);
         m_Gameplay_ZoomMouse = m_Gameplay.FindAction("ZoomMouse", throwIfNotFound: true);
+        m_Gameplay_DragButton = m_Gameplay.FindAction("DragButton", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -266,8 +287,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Gameplay;
     private List<IGameplayActions> m_GameplayActionsCallbackInterfaces = new List<IGameplayActions>();
     private readonly InputAction m_Gameplay_Tap;
-    private readonly InputAction m_Gameplay_Drag;
+    private readonly InputAction m_Gameplay_DragPosition;
     private readonly InputAction m_Gameplay_ZoomMouse;
+    private readonly InputAction m_Gameplay_DragButton;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -284,13 +306,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Tap => m_Wrapper.m_Gameplay_Tap;
         /// <summary>
-        /// Provides access to the underlying input action "Gameplay/Drag".
+        /// Provides access to the underlying input action "Gameplay/DragPosition".
         /// </summary>
-        public InputAction @Drag => m_Wrapper.m_Gameplay_Drag;
+        public InputAction @DragPosition => m_Wrapper.m_Gameplay_DragPosition;
         /// <summary>
         /// Provides access to the underlying input action "Gameplay/ZoomMouse".
         /// </summary>
         public InputAction @ZoomMouse => m_Wrapper.m_Gameplay_ZoomMouse;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/DragButton".
+        /// </summary>
+        public InputAction @DragButton => m_Wrapper.m_Gameplay_DragButton;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -320,12 +346,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Tap.started += instance.OnTap;
             @Tap.performed += instance.OnTap;
             @Tap.canceled += instance.OnTap;
-            @Drag.started += instance.OnDrag;
-            @Drag.performed += instance.OnDrag;
-            @Drag.canceled += instance.OnDrag;
+            @DragPosition.started += instance.OnDragPosition;
+            @DragPosition.performed += instance.OnDragPosition;
+            @DragPosition.canceled += instance.OnDragPosition;
             @ZoomMouse.started += instance.OnZoomMouse;
             @ZoomMouse.performed += instance.OnZoomMouse;
             @ZoomMouse.canceled += instance.OnZoomMouse;
+            @DragButton.started += instance.OnDragButton;
+            @DragButton.performed += instance.OnDragButton;
+            @DragButton.canceled += instance.OnDragButton;
         }
 
         /// <summary>
@@ -340,12 +369,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Tap.started -= instance.OnTap;
             @Tap.performed -= instance.OnTap;
             @Tap.canceled -= instance.OnTap;
-            @Drag.started -= instance.OnDrag;
-            @Drag.performed -= instance.OnDrag;
-            @Drag.canceled -= instance.OnDrag;
+            @DragPosition.started -= instance.OnDragPosition;
+            @DragPosition.performed -= instance.OnDragPosition;
+            @DragPosition.canceled -= instance.OnDragPosition;
             @ZoomMouse.started -= instance.OnZoomMouse;
             @ZoomMouse.performed -= instance.OnZoomMouse;
             @ZoomMouse.canceled -= instance.OnZoomMouse;
+            @DragButton.started -= instance.OnDragButton;
+            @DragButton.performed -= instance.OnDragButton;
+            @DragButton.canceled -= instance.OnDragButton;
         }
 
         /// <summary>
@@ -394,12 +426,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnTap(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Drag" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "DragPosition" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnDrag(InputAction.CallbackContext context);
+        void OnDragPosition(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "ZoomMouse" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
@@ -407,5 +439,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnZoomMouse(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DragButton" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDragButton(InputAction.CallbackContext context);
     }
 }
