@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private GameObject miniOptionsPanel;
     [SerializeField] private GameObject decorationPanel;
+    [SerializeField] private MiniGamesUI miniGamesUI;
 
     // --- MÉTODOS PÚBLICOS DE CONTROL ---
 
@@ -76,5 +77,13 @@ public class UIManager : MonoBehaviour
         inventoryPanel.SetActive(false);
         miniOptionsPanel.SetActive(false);
         decorationPanel.SetActive(false);
+    }
+    /// <summary>
+    /// Muestra el panel de minijuegos y oculta los demás.
+    /// </summary>
+    public void OpenMiniGamePanel()
+    {
+        HideAllPanels();
+        miniGamesUI.Show();
     }
 }
