@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Script para cada botón de compra de un ítem en la tienda.
+/// Botón de compra en tienda. Permite comprar objetos base o decorativos.
 /// </summary>
 public class ShopItem : MonoBehaviour
 {
@@ -12,6 +12,9 @@ public class ShopItem : MonoBehaviour
     [SerializeField] private int price = 100;
     [SerializeField] private GameObject prefabToGive;
 
+    [Tooltip("Si es true, este objeto es una decoración, no se puede colocar libremente en el plano.")]
+    [SerializeField] private bool isDecoration = false;
+
     [Header("UI References")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text priceText;
@@ -19,14 +22,16 @@ public class ShopItem : MonoBehaviour
 
     private void Awake()
     {
-        // Inicializar UI
         if (nameText != null)
             nameText.text = itemName;
+
         if (priceText != null)
             priceText.text = price + " coins";
 
         if (buyButton != null)
+        {
             buyButton.onClick.AddListener(OnBuyClicked);
+        }
     }
 
     private void OnDestroy()
@@ -37,12 +42,11 @@ public class ShopItem : MonoBehaviour
 
     private void OnBuyClicked()
     {
-        // Intentar gastar monedas
         if (CurrencyManager.Instance.SpendCoins(price))
         {
+            // Puedes envolver el prefab en una estructura que guarde isDecoration
             InventoryManager.Instance.AddItem(prefabToGive);
-            Debug.Log("Compra exitosa: " + itemName);
-            // Opcional: desactivar botón o eliminar UI del ítem
+            // Opcional: desactivar botón para evitar re-compras
             buyButton.interactable = false;
         }
         else

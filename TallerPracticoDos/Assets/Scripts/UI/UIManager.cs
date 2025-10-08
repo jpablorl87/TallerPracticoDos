@@ -1,89 +1,92 @@
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
-/// El UIManager es responsable de controlar la visibilidad de los diferentes
-/// paneles de la interfaz de usuario. Su diseño se basa en el principio de que
-/// solo un panel puede estar activo a la vez, lo que simplifica la lógica
-/// de navegación y evita que los elementos de UI se superpongan.
+/// Administra la visibilidad de los paneles UI y la generación de botones de decoración.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
-    // --- REFERENCIAS DE PANELES ---
-
-    // Las siguientes variables son referencias a los objetos de la UI en la
-    // jerarquía de la escena. Se marcan con [SerializeField] para que puedan
-    // ser asignadas desde el Inspector de Unity, permitiendo una fácil
-    // configuración sin necesidad de buscarlas en el código.
-
+    [Header("Paneles Principales")]
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private GameObject miniOptionsPanel;
-    [SerializeField] private GameObject decorationPanel;
-    [SerializeField] private MiniGamesUI miniGamesUI;
+    [SerializeField] private GameObject shopPanel;
+    [SerializeField] private GameObject minigamesPanel;
 
-    // --- MÉTODOS PÚBLICOS DE CONTROL ---
+    [Header("Decoración UI")]
+    [Tooltip("Prefab de botón (UI) para una decoración, con Button + TMP_Text")]
+    [SerializeField] private GameObject decorationItemTemplate;
+    [Tooltip("Contenedor dentro del panel donde se instancian los botones decoración")]
+    [SerializeField] private Transform decorationContentArea;
 
-    // Estos métodos son públicos para que otros scripts, como el `InteractionController`
-    // o los botones de la UI, puedan llamarlos directamente para cambiar el estado de la interfaz.
+    // Referencia al controlador para mandar los eventos
+    private InteractionController interactionController;
 
-    /// <summary>
-    /// Activa el panel de inventario y asegura que todos los demás estén ocultos.
-    /// Este método se llamaría, por ejemplo, al presionar el botón de "Inventario".
-    /// </summary>
-    public void OpenInventory()
+    private void Awake()
     {
-        // Activa el panel de inventario.
-        inventoryPanel.SetActive(true);
-        // Desactiva los demás paneles para garantizar que no haya solapamientos.
-        miniOptionsPanel.SetActive(false);
-        decorationPanel.SetActive(false);
+        // Obtiene la referencia si no fue asignada desde el Inspector
+        if (interactionController == null)
+        {
+            interactionController = FindObjectOfType<InteractionController>();
+        }
     }
 
     /// <summary>
-    /// Muestra el mini panel de opciones para un objeto seleccionado y oculta los demás.
-    /// Es llamado por el `InteractionController` cuando el usuario hace clic en un objeto en la escena.
-    /// </summary>
-    public void ShowMiniOptions()
-    {
-        // Desactiva el inventario para evitar que ambos paneles estén visibles.
-        inventoryPanel.SetActive(false);
-        // Activa el mini panel de opciones.
-        miniOptionsPanel.SetActive(true);
-        // Desactiva el panel de decoración.
-        decorationPanel.SetActive(false);
-    }
-
-    /// <summary>
-    /// Muestra el panel de decoración y oculta los demás.
-    /// Es llamado por el `InteractionController` después de que el usuario selecciona la opción "Decorar".
-    /// </summary>
-    public void OpenDecorationPanel()
-    {
-        // Desactiva el inventario y el mini panel.
-        inventoryPanel.SetActive(false);
-        miniOptionsPanel.SetActive(false);
-        // Activa el panel de decoración.
-        decorationPanel.SetActive(true);
-    }
-
-    /// <summary>
-    /// Oculta todos los paneles de la UI.
-    /// Este método es fundamental para limpiar la interfaz, por ejemplo,
-    /// cuando el usuario ha completado una acción como colocar un objeto o
-    /// ha seleccionado una opción en los mini paneles.
+    /// Oculta todos los paneles.
     /// </summary>
     public void HideAllPanels()
     {
-        // Simplemente desactiva todos los paneles.
-        inventoryPanel.SetActive(false);
-        miniOptionsPanel.SetActive(false);
-        decorationPanel.SetActive(false);
+        inventoryPanel?.SetActive(false);
+        miniOptionsPanel?.SetActive(false);
+        shopPanel?.SetActive(false);
+        minigamesPanel?.SetActive(false);
     }
-    /// <summary>
-    /// Muestra el panel de minijuegos y oculta los demás.
-    /// </summary>
-    public void OpenMiniGamePanel()
+
+    public void OpenInventoryPanel()
     {
         HideAllPanels();
-        miniGamesUI.Show();
+        inventoryPanel?.SetActive(true);
+    }
+
+    public void OpenMinigamesPanel()
+    {
+        HideAllPanels();
+        minigamesPanel?.SetActive(true);
+    }
+
+    public void OpenShopPanel()
+    {
+        HideAllPanels();
+        shopPanel?.SetActive(true);
+    }
+
+    public void ShowMiniOptions()
+    {
+        HideAllPanels();
+        miniOptionsPanel?.SetActive(true);
+    }
+
+    /// <summary>
+    /// Cierra un panel específico. Usado por botones "Cerrar".
+    /// </summary>
+    public void ClosePanel(GameObject panel)
+    {
+        if (panel != null)
+            panel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Este método es llamado por los botones del panel de decoración.
+    /// Lo llamará el botón correspondiente con el índice que representa la decoración.
+    /// </summary>
+    /// <param name="decorIndex">Índice en el arreglo decorationPrefabs del InteractionController</param>
+    public void OnDecorationButtonClicked(int decorIndex)
+    {
+        if (interactionController != null)
+        {
+            interactionController.OnDecorationItemSelected(decorIndex);
+        }
+        // Opcional: cerrar el panel tras seleccionar una decoración
+        HideAllPanels();
     }
 }

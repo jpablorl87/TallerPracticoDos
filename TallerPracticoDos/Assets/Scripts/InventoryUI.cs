@@ -1,18 +1,22 @@
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+using TMPro;
+
 /// <summary>
 /// Muestra los objetos del inventario visualmente en la UI.
-/// Se suscribe al evento OnInventoryUpdated para actualizar automáticamente.
+/// Se suscribe a OnInventoryUpdated para refrescar automáticamente.
 /// </summary>
 public class InventoryUI : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private RectTransform contentArea; // Contenedor donde se agregan los ítems
-    [SerializeField] private GameObject itemTemplate;   // Prefab visual para representar cada ítem (debe ser un prefab UI)
+    [SerializeField] private RectTransform contentArea;  // contenedor de ítems
+    [SerializeField] private GameObject itemTemplate;    // prefab visual (botón) para cada ítem
+
+    [Header("Dependencies")]
+    [SerializeField] private InteractionController interactionController;
+
     private void OnEnable()
     {
-        // Suscribirse al evento de actualización
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryUpdated += RefreshUI;
@@ -22,33 +26,43 @@ public class InventoryUI : MonoBehaviour
 
     private void OnDisable()
     {
-        // Desuscribirse para evitar errores
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.OnInventoryUpdated -= RefreshUI;
         }
     }
+
     /// <summary>
-    /// Actualiza la interfaz de usuario con los elementos actuales del inventario.
+    /// Limpia ítems previos y genera botones por cada ítem comprados.
     /// </summary>
     private void RefreshUI()
     {
-        // Limpiar contenido anterior
+        // Limpiar
         foreach (Transform child in contentArea)
         {
             Destroy(child.gameObject);
         }
-        // Agregar cada ítem como una entrada visual
+
         var items = InventoryManager.Instance.GetItems();
-        foreach (GameObject item in items)
+        for (int i = 0; i < items.Count; i++)
         {
+            int index = i; // capturar para la lambda
             GameObject newItem = Instantiate(itemTemplate, contentArea);
-            newItem.SetActive(true); // Asegúrate de que esté activo (en caso de estar desactivado como plantilla)
-            // Opcional: Mostrar el nombre del prefab o un ícono personalizado
+            newItem.SetActive(true);
+
+            // Mostrar nombre
             TMP_Text label = newItem.GetComponentInChildren<TMP_Text>();
             if (label != null)
+                label.text = items[i].name;
+
+            // Botón para seleccionar
+            Button btn = newItem.GetComponent<Button>();
+            if (btn != null)
             {
-                label.text = item.name;
+                btn.onClick.AddListener(() =>
+                {
+                    interactionController.OnInventoryItemSelected(index);
+                });
             }
         }
     }

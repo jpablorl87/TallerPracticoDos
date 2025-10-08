@@ -1,17 +1,15 @@
 using UnityEngine;
-using System.Collections.Generic;
 using System;
-
+using System.Collections.Generic;
 
 /// <summary>
-/// Administra los items que el jugador ha comprado / desbloqueado.
-/// Singleton para acceso global.
+/// Administra los ítems que el jugador ha comprado o desbloqueado.
+/// Singleton para acceso global y persistencia de la instancia entre escenas.
 /// </summary>
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
 
-    // Evento público que se lanza cuando se agrega un nuevo ítem al inventario
     public event Action OnInventoryUpdated;
 
     private List<GameObject> items = new List<GameObject>();
@@ -23,24 +21,21 @@ public class InventoryManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
     /// <summary>
-    /// Añade un objeto al inventario en memoria y lanza el evento.
+    /// Añade un prefab al inventario y dispara evento para refrescar UI.
     /// </summary>
     public void AddItem(GameObject prefab)
     {
         items.Add(prefab);
-
-        // Lanza el evento para notificar que el inventario cambió
         OnInventoryUpdated?.Invoke();
     }
 
     /// <summary>
-    /// Retorna todos los objetos comprados hasta ahora.
+    /// Retorna lista inmutable de ítems comprados.
     /// </summary>
     public IReadOnlyList<GameObject> GetItems()
     {

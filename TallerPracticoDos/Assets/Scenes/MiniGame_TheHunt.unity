@@ -763,7 +763,9 @@ MonoBehaviour:
   timerText: {fileID: 1786865365}
   endPanel: {fileID: 409490617}
   finalCoinsText: {fileID: 1755706809}
+  continueButton: {fileID: 1977027912}
   gameDuration: 30
+  spawner: {fileID: 1328665323}
 --- !u!1 &1328665321
 GameObject:
   m_ObjectHideFlags: 0

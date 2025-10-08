@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -11,29 +12,36 @@ public class CurrencyManager : MonoBehaviour
     [SerializeField] private int startingCoins = 0;
 
     private const string CoinsKey = "PLAYER_COINS";
-
     public int Coins { get; private set; }
+    public event Action OnCoinsChanged;
 
     private void Awake()
     {
-        // Patrón Singleton
+        // Singleton: mantener una única instancia global
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Solo durante pruebas en editor, reiniciar monedas
+#if UNITY_EDITOR
+        PlayerPrefs.DeleteKey(CoinsKey);
+#endif
 
         LoadCoins();
     }
 
     /// <summary>
-    /// Carga las monedas del almacenamiento persistente.
+    /// Carga las monedas guardadas desde PlayerPrefs o usa el valor inicial.
     /// </summary>
     private void LoadCoins()
     {
         Coins = PlayerPrefs.GetInt(CoinsKey, startingCoins);
+        OnCoinsChanged?.Invoke(); // Notifica listeners al cargar monedas
     }
 
     /// <summary>
@@ -46,16 +54,17 @@ public class CurrencyManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Añade monedas al total actual y guarda el cambio.
+    /// Añade monedas al total actual.
     /// </summary>
     public void AddCoins(int amount)
     {
         Coins += amount;
         SaveCoins();
+        OnCoinsChanged?.Invoke(); // Notifica listeners
     }
 
     /// <summary>
-    /// Intenta gastar monedas. Retorna true si fue exitoso, false si no hay suficientes.
+    /// Intenta gastar monedas. Devuelve true si fue exitoso.
     /// </summary>
     public bool SpendCoins(int amount)
     {
@@ -64,6 +73,7 @@ public class CurrencyManager : MonoBehaviour
 
         Coins -= amount;
         SaveCoins();
+        OnCoinsChanged?.Invoke(); // Notifica listeners
         return true;
     }
 }
