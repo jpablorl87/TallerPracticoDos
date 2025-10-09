@@ -17,19 +17,21 @@ public class CurrencyManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton: mantener una única instancia global
+        // Si ya existe una instancia válida, destruye esta y sal del método inmediatamente
         if (Instance != null && Instance != this)
         {
+            Debug.Log("Destroying duplicate CurrencyManager");
             Destroy(gameObject);
             return;
         }
 
+        // Solo ejecuta el resto si esta es la instancia válida
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        Debug.Log("CurrencyManager Awake - Instance set");
 
-        // Solo durante pruebas en editor, reiniciar monedas
 #if UNITY_EDITOR
-        PlayerPrefs.DeleteKey(CoinsKey);
+        PlayerPrefs.DeleteKey(CoinsKey); // Esto solo se debe ejecutar una vez
 #endif
 
         LoadCoins();
@@ -58,6 +60,7 @@ public class CurrencyManager : MonoBehaviour
     /// </summary>
     public void AddCoins(int amount)
     {
+        Debug.Log($"AddCoins called with amount: {amount}");
         Coins += amount;
         SaveCoins();
         OnCoinsChanged?.Invoke(); // Notifica listeners

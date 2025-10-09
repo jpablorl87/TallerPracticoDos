@@ -47,12 +47,6 @@ public class TheHuntGameManager : MonoBehaviour
         GameIsRunning = true;
         endPanel.SetActive(false);
 
-        // Suscribir el botón de "Continue" para cerrar y regresar
-        if (continueButton != null)
-        {
-            continueButton.onClick.AddListener(OnContinuePressed);
-        }
-
         // Iniciar spawner
         spawner.StartSpawning();
 
