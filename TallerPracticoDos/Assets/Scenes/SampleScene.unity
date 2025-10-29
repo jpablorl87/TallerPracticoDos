@@ -3544,14 +3544,14 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 24f73ce7efc35c747a372e30ac2fa0f4, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraZoomController
   minZoom: 2
-  maxZoom: 10
+  maxZoom: 5
   zoomSpeedMouse: 0.1
   zoomSpeedTouch: 0.05
   panSpeed: 0.005
-  panLimitMin: {x: -10, y: -10}
-  panLimitMax: {x: 10, y: 10}
+  panLimitMin: {x: -10, y: -2}
+  panLimitMax: {x: 15, y: 10}
   inputActionsAsset: {fileID: -944628639613478452, guid: 6d3901b727a430c4bb80c8a07ce4a33c, type: 3}
 --- !u!20 &1497433486
 Camera:
