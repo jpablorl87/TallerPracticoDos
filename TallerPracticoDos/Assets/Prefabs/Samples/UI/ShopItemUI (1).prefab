@@ -445,7 +445,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   itemName: SampleBall
-  price: 10
+  price: 1
   prefabToGive: {fileID: 6050886689511979959, guid: 2c0c2e186046616469f4d290ced62036, type: 3}
   isDecoration: 0
   nameText: {fileID: 4631024216750016750}

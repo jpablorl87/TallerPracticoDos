@@ -2035,7 +2035,7 @@ GameObject:
   - component: {fileID: 589827352}
   m_Layer: 0
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2584,7 +2584,7 @@ GameObject:
   - component: {fileID: 828409712}
   m_Layer: 0
   m_Name: Plane
-  m_TagString: Untagged
+  m_TagString: Floor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3760,7 +3760,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraZoomController
   minZoom: 2
-  maxZoom: 5
+  maxZoom: 7
   zoomSpeedMouse: 0.1
   zoomSpeedTouch: 0.05
   panSpeed: 0.005
@@ -3944,8 +3944,10 @@ MonoBehaviour:
   miniOptionsPanel: {fileID: 898647883}
   shopPanel: {fileID: 1508413865}
   minigamesPanel: {fileID: 1140823184}
+  moveButton: {fileID: 259667307}
+  deleteButton: {fileID: 517369345}
   decorationItemTemplate: {fileID: 8111357328253857524, guid: f5a67a453bed82642b9edfbd0ffc206b, type: 3}
-  decorationContentArea: {fileID: 0}
+  decorationContentArea: {fileID: 48190755}
 --- !u!4 &1512960307
 Transform:
   m_ObjectHideFlags: 0

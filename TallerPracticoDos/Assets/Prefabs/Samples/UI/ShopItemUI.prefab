@@ -445,8 +445,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   itemName: SampleTree
-  price: 10
+  price: 1
   prefabToGive: {fileID: 2096143240159322331, guid: a404359deda5d664595ae436fe5d7537, type: 3}
+  isDecoration: 0
   nameText: {fileID: 4512791848085184859}
   priceText: {fileID: 5416077774115959340}
   buyButton: {fileID: 7749052538295310120}

@@ -125,5 +125,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SelectableObject
   allowedSurface: 1
+  placementOrientation: 1
   canBeDecorated: 0
   allowedDecorationTags: []
