@@ -52,14 +52,34 @@ public class InteractionController : MonoBehaviour
         if (IsPointerOverUI()) return;
 
         Vector2 screenPos = GetCurrentPointerPosition();
+        Ray ray = mainCamera.ScreenPointToRay(screenPos);
+        RaycastHit hit;
 
-        // 1. Si estamos en modo colocar un objeto base
+        // 0. FINALIZACIÓN DE REUBICACIÓN (Tap para soltar)
+        if (isMovingObject && ghostObject != null)
+        {
+            if (Physics.Raycast(ray, out hit))
+            {
+                EndMoveAtPosition(hit.point);
+                return;
+            }
+        }
+
+        // 1. COLOCACIÓN INICIAL (Colocar un nuevo prefab)
         if (waitingToPlaceBase && selectedBasePrefab != null)
         {
-            Ray ray = mainCamera.ScreenPointToRay(screenPos);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.Raycast(ray, out hit /*, Mathf.Infinity, surfaceLayer */))
             {
+                // ... (Lógica de validación) ...
+                SelectableObject soPrefab = selectedBasePrefab.GetComponent<SelectableObject>();
+                Collider itemCollider = selectedBasePrefab.GetComponent<Collider>();
+
+                if (itemCollider == null || soPrefab == null) { /* Error */ return; }
+                if (!IsPlacementValid(selectedBasePrefab, hit)) { /* Warning */ return; }
+
                 GameObject obj = Instantiate(selectedBasePrefab, hit.point, Quaternion.identity, sceneRoot);
+                ApplyPlacement(obj, hit); // Aplicar offset y rotación
+
                 if (obj.GetComponent<SelectableObject>() == null)
                 {
                     obj.AddComponent<SelectableObject>();
@@ -68,50 +88,31 @@ public class InteractionController : MonoBehaviour
 
                 waitingToPlaceBase = false;
                 selectedBasePrefab = null;
+                return;
             }
-            return;
         }
 
-        // 2. Si estamos moviendo un objeto existente (modo fantasma)
-        if (isMovingObject && ghostObject != null)
+        // 2. INICIAR REUBICACIÓN (Seleccionar un objeto existente)
+        if (placedObject != null && !isMovingObject)
         {
-            Ray ray = mainCamera.ScreenPointToRay(screenPos);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.Raycast(ray, out hit) && hit.collider.gameObject == placedObject)
             {
-                EndMoveAtPosition(hit.point);
-            }
-            return;
-        }
+                isMovingObject = true;
+                placedObject.SetActive(false);
 
-        // 3. Si estamos en modo decoración: esperamos que el tap sea sobre el objeto padre
-        if (waitingToDecorate && pendingDecorationPrefab != null && placedObject != null)
-        {
-            Ray ray = mainCamera.ScreenPointToRay(screenPos);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                if (hit.collider.gameObject == placedObject)
-                {
-                    GameObject dec = Instantiate(pendingDecorationPrefab, placedObject.transform);
-                    Vector3 localPos = placedObject.transform.InverseTransformPoint(hit.point);
-                    dec.transform.localPosition = localPos;
-                }
-            }
-            waitingToDecorate = false;
-            pendingDecorationPrefab = null;
-            return;
-        }
+                ghostObject = Instantiate(placedObject, placedObject.transform.position, placedObject.transform.rotation, sceneRoot);
 
-        // 4. Si no estamos en ninguno de los modos especiales, chequear selección de objeto en escena
-        Ray ray2 = mainCamera.ScreenPointToRay(screenPos);
-        if (Physics.Raycast(ray2, out RaycastHit hit2))
-        {
-            SelectableObject so = hit2.collider.gameObject.GetComponent<SelectableObject>();
-            if (so != null)
-            {
-                placedObject = so.gameObject;
+                // RESTAURACIÓN DE UI
                 uiManager.ShowMiniOptions();
                 return;
             }
+        }
+
+        // 4. Deseleccionar
+        if (placedObject != null && !isMovingObject)
+        {
+            placedObject = null;
+            uiManager.HideAllPanels();
         }
     }
 
@@ -204,11 +205,20 @@ public class InteractionController : MonoBehaviour
 
     private void EndMoveAtPosition(Vector3 pos)
     {
-        placedObject.transform.position = pos;
-        placedObject.SetActive(true);
-        Destroy(ghostObject);
-        ghostObject = null;
-        isMovingObject = false;
+        // Re-lanza el Raycast en el punto final para obtener la normal (hit.normal) correcta.
+        Ray ray = mainCamera.ScreenPointToRay(GetCurrentPointerPosition());
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            placedObject.SetActive(true);
+
+            // Llama a la lógica de offset y rotación con el hit.point final
+            ApplyPlacement(placedObject, hit);
+
+            // Limpieza
+            Destroy(ghostObject);
+            ghostObject = null;
+            isMovingObject = false;
+        }
     }
 
     private bool IsPointerOverUI()
@@ -223,5 +233,108 @@ public class InteractionController : MonoBehaviour
 #else
         return Mouse.current?.position.ReadValue() ?? Vector2.zero;
 #endif
+    }
+    /// <summary>
+    /// Verifica si el objeto se puede colocar en la superficie golpeada por el Raycast.
+    /// </summary>
+    private bool IsPlacementValid(GameObject prefab, RaycastHit hit)
+    {
+        // Se asume que el prefab tiene el componente SelectableObject para leer la regla.
+        SelectableObject soPrefab = prefab.GetComponent<SelectableObject>();
+        if (soPrefab == null) return true; // Si no tiene reglas, permitir por defecto
+
+        // Obtiene la normal de la superficie golpeada.
+        Vector3 normal = hit.normal.normalized;
+
+        // Utilizamos el producto punto (Dot product) para determinar si la superficie es horizontal (piso).
+        // Vector3.up (0, 1, 0) vs normal. Si es cercano a 1, es un piso.
+        float floorTolerance = 0.1f; // Pequeña tolerancia para inclinaciones
+        bool isFloor = Vector3.Dot(normal, Vector3.up) > 1f - floorTolerance;
+
+        switch (soPrefab.allowedSurface)
+        {
+            case PlacementSurface.FloorOnly:
+                return isFloor;
+            case PlacementSurface.WallOnly:
+                // Consideramos pared cualquier superficie que no sea el piso o que sea casi vertical.
+                return !isFloor;
+            case PlacementSurface.AnySurface:
+            default:
+                return true; // Permitir en cualquier lugar
+        }
+    }
+    /// <summary>
+    /// Calcula y aplica la posición y rotación correctas a un objeto instanciado o movido, 
+    /// aplicando el offset necesario para que el borde toque el hit.point.
+    /// </summary>
+    private void ApplyPlacement(GameObject obj, RaycastHit hit)
+    {
+        SelectableObject so = obj.GetComponent<SelectableObject>();
+        Collider placedCollider = obj.GetComponent<Collider>();
+
+        if (so == null || placedCollider == null) return;
+
+        // 1. Calcular la Rotación FINAL
+        Quaternion targetRotation;
+
+        if (so.placementOrientation == PlacementOrientation.Vertical)
+        {
+            // CASO PISO
+            targetRotation = Quaternion.identity;
+        }
+        else // PlacementOrientation.Horizontal (Pared)
+        {
+            // CASO PARED: Z mira hacia afuera de la pared
+            targetRotation = Quaternion.LookRotation(-hit.normal, Vector3.up);
+
+            // Forzar rotación en Y a 0, 90, 180 o 270 grados
+            float yAngle = targetRotation.eulerAngles.y;
+            float roundedYAngle = Mathf.Round(yAngle / 90f) * 90f;
+            targetRotation = Quaternion.Euler(targetRotation.eulerAngles.x, roundedYAngle, targetRotation.eulerAngles.z);
+        }
+
+        // Aplicar la rotación final
+        obj.transform.rotation = targetRotation;
+
+        // Mover el objeto al punto de impacto (hit.point) temporalmente
+        obj.transform.position = hit.point;
+
+        // 2. Calcular Offset y Reposicionamiento
+        float offsetDepth;
+
+        if (so.placementOrientation == PlacementOrientation.Vertical)
+        {
+            // CASO PISO: Altura del Collider del Mundo (Y-extents). Funciona bien.
+            offsetDepth = placedCollider.bounds.extents.y;
+
+            // Elevar la posición central por el offset
+            obj.transform.position += hit.normal * offsetDepth;
+
+            // Asegurar que la rotación sea plana (X=0, Z=0)
+            obj.transform.rotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
+        }
+        else // Pared
+        {
+            // *** CORRECCIÓN CLAVE DE FLOTACIÓN EN PARED ***
+            BoxCollider boxCollider = obj.GetComponent<BoxCollider>();
+
+            if (boxCollider != null)
+            {
+                // La profundidad del objeto es la mitad de su tamaño local en el EJE Z (profundidad).
+                // boxCollider.size.z * 0.5f * localScale.z
+                offsetDepth = boxCollider.size.z * 0.5f * obj.transform.localScale.z;
+            }
+            else
+            {
+                // Fallback (Si no hay BoxCollider): Usamos el bounds del mundo
+                // El bounds.extents nos da la mitad del tamaño AABB (alineado al mundo)
+                // Usamos Dot Product para proyectar la distancia MÁXIMA del centro al borde
+                // en la dirección de la normal.
+                offsetDepth = Mathf.Abs(Vector3.Dot(placedCollider.bounds.extents, hit.normal));
+            }
+
+            // Reposicionar: Mover el centro del objeto hacia AFUERA de la pared
+            obj.transform.position -= hit.normal * offsetDepth;
+        }
     }
 }
