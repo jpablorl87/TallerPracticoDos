@@ -99,10 +99,7 @@ public class TheHuntGameManager : MonoBehaviour
     /// </summary>
     private void OnContinuePressed()
     {
-        // Podrías llamar un sistema global de monedas aquí
-        CurrencyManager.Instance.AddCoins(coins);
-
-        // Regresar a escena principal (por ejemplo SampleScene)
+        // Solo llama al flujo central que maneja monedas y retorno de escena
         MiniGameManager.Instance.FinishMiniGame(coins);
     }
 }

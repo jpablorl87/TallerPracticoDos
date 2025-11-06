@@ -30,7 +30,7 @@ public class UIManager : MonoBehaviour
     {
         // Obtiene la referencia si no fue asignada desde el Inspector
         if (interactionController == null)
-            interactionController = FindObjectOfType<InteractionController>();
+            interactionController = FindFirstObjectByType<InteractionController>();
 
         // Ensure buttons are not wiredup multiple times
         if (moveButton != null) moveButton.onClick.RemoveAllListeners();

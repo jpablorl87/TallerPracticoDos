@@ -14,6 +14,7 @@ public class MiniGameManager : MonoBehaviour
     // --- CONFIGURACIÓN SERIALIZADA ---
     [Tooltip("Nombre de la escena principal a la que se regresará después del minijuego.")]
     [SerializeField] private string mainSceneName = "SampleScene";
+    private bool hasFinished = false;
     // --- ESTADO ---
     public int CoinsEarned { get; private set; }
     private string currentMiniGameScene;
@@ -44,7 +45,21 @@ public class MiniGameManager : MonoBehaviour
     /// <param name="coinsEarned">Cantidad de monedas ganadas en el minijuego.</param>
     public void FinishMiniGame(int coinsEarned)
     {
+        if (hasFinished) return; // evita duplicados
+        hasFinished = true;
+
         CoinsEarned = coinsEarned;
+
+        if (CurrencyManager.Instance != null)
+        {
+            CurrencyManager.Instance.AddCoins(coinsEarned);
+        }
+        else
+        {
+            Debug.LogWarning("[MiniGameManager] CurrencyManager no disponible al finalizar minijuego.");
+        }
+
         SceneManager.LoadScene(mainSceneName);
     }
+
 }

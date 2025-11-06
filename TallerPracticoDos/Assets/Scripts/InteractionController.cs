@@ -55,6 +55,7 @@ public class InteractionController : MonoBehaviour
 
         if (isMovingObject && ghostObject == null)
         {
+            // Resetea modo mover si algo raro pasó
             isMovingObject = false;
             placedObject?.SetActive(true);
             return;
@@ -72,6 +73,17 @@ public class InteractionController : MonoBehaviour
                 placedObject = null;
                 uiManager.HideAllPanels();
             }
+            return;
+        }
+
+        // --- Nuevo: si clic en un gato, lo calmamos y salimos ---
+        CatAI cat = hit.collider.GetComponentInParent<CatAI>();
+        if (cat != null)
+        {
+            // Duración configurable por inspector en CatAI, aquí lo sobrescribimos con random
+            float calmFor = Random.Range(20f, 60f);
+            cat.CalmCat(calmFor);
+            Debug.Log("[InteractionController] Gato calmado por clic/tap.");
             return;
         }
 
@@ -167,6 +179,7 @@ public class InteractionController : MonoBehaviour
             Debug.Log("[Tap] Clic fuera.");
         }
     }
+
 
 
     /// <summary>
@@ -315,49 +328,6 @@ public class InteractionController : MonoBehaviour
         uiManager.HideAllPanels();
     }
 
-    // --- NUEVO: EndMove recibe el hit ya calculado ---
-    private void EndMoveAtPosition(RaycastHit hit)
-    {
-        if (!isMovingObject)
-            return;
-
-        // Si por algún motivo el objeto real no existe, usamos el ghost
-        if (placedObject == null && ghostObject != null)
-        {
-            placedObject = ghostObject;
-            ghostObject = null;
-        }
-
-        if (placedObject == null)
-        {
-            Debug.LogWarning("[Move] No hay objeto válido para finalizar movimiento.");
-            isMovingObject = false;
-            return;
-        }
-
-        //  Reactivar el objeto real y aplicar colocación en la nueva posición
-        placedObject.SetActive(true);
-        ApplyPlacement(placedObject, hit);
-
-        //  Eliminar el ghost
-        if (ghostObject != null)
-        {
-            Destroy(ghostObject);
-            ghostObject = null;
-        }
-
-        //  Limpiar estados
-        isMovingObject = false;
-        waitingToPlaceBase = false;
-        waitingToDecorate = false;
-        pendingDecorationPrefab = null;
-
-        //  Ocultar cualquier panel abierto
-        uiManager.HideAllPanels();
-
-        Debug.Log("[Move] Objeto reubicado correctamente.");
-    }
-
     private bool IsPointerOverUI()
     {
         return EventSystem.current.IsPointerOverGameObject(Pointer.current?.deviceId ?? -1);
@@ -404,6 +374,7 @@ public class InteractionController : MonoBehaviour
     {
         SelectableObject so = obj.GetComponent<SelectableObject>();
         Collider placedCollider = obj.GetComponent<Collider>() ?? obj.GetComponentInChildren<Collider>();
+
         if (so == null || placedCollider == null)
         {
             Debug.LogWarning("ApplyPlacement: SelectableObject o Collider no encontrado en el objeto.");
@@ -416,190 +387,59 @@ public class InteractionController : MonoBehaviour
 
         if (so.placementOrientation == PlacementOrientation.Vertical)
         {
-            // Piso
             targetRotation = Quaternion.Euler(0, obj.transform.eulerAngles.y, 0);
             obj.transform.rotation = targetRotation;
-
-            // Colocamos el centro en el punto de impacto temporalmente
             obj.transform.position = hit.point;
 
-            // Offset vertical (usar bounds extents en Y en world space)
             float offsetY = placedCollider.bounds.extents.y;
             obj.transform.position += hit.normal * offsetY;
-
-            Debug.DrawRay(hit.point, hit.normal * 0.3f, Color.red, 2f);
         }
         else
         {
-            // Pared
             targetRotation = Quaternion.LookRotation(-hit.normal, Vector3.up);
             obj.transform.rotation = targetRotation;
-
-            // Colocar el centro en el punto de impacto
             obj.transform.position = hit.point;
 
-            // Intentar corregir con ClosestPoint
             Vector3 closest = placedCollider.ClosestPoint(hit.point);
             Vector3 correction = hit.point - closest;
-
-            // Si la corrección es mínima, usamos fallback con bounds
             if (correction.sqrMagnitude < 1e-6f)
             {
                 Vector3 extents = placedCollider.bounds.extents;
                 float depth = Mathf.Abs(Vector3.Dot(extents, hit.normal));
                 correction = hit.normal * depth;
             }
-
-            // Aplicar corrección (empujar hacia afuera)
-            obj.transform.position += correction;
-            obj.transform.position += hit.normal * 0.001f;
-
-            Debug.DrawRay(hit.point, hit.normal * 0.3f, Color.red, 2f);
-            Debug.DrawLine(hit.point, closest, Color.green, 2f);
-        }
-
-        // --- 2. Verificar colisiones con otros objetos antes de finalizar ---
-        // (Ignoramos el piso y paredes, sólo bloqueamos si choca con otros objetos decorativos)
-
-        Bounds worldBounds = placedCollider.bounds;
-        Vector3 center = worldBounds.center;
-        Vector3 halfExtents = worldBounds.extents;
-
-        // Obtenemos todos los colliders cercanos
-        Collider[] hits = Physics.OverlapBox(
-            center,
-            halfExtents,
-            obj.transform.rotation,
-            Physics.DefaultRaycastLayers,
-            QueryTriggerInteraction.Ignore
-        );
-
-        int blockingCount = 0;
-        foreach (var h in hits)
-        {
-            if (h == placedCollider)
-                continue; // ignorar su propio collider
-
-            // Si el collider pertenece a una superficie (piso/pared), lo ignoramos
-            if (h.CompareTag("Floor") || h.CompareTag("Wall"))
-                continue;
-
-            // Si es otro objeto seleccionable (mueble, decoración, etc.), cuenta como colisión bloqueante
-            if (h.GetComponentInParent<SelectableObject>() != null)
-            {
-                blockingCount++;
-            }
-        }
-
-        if (blockingCount > 0)
-        {
-            Debug.Log($"[ApplyPlacement] Colisión con {blockingCount} objeto(s) decorativo(s). Cancelando colocación.");
-
-            // Si es un movimiento, mantener ghost para intentar otra posición
-            if (isMovingObject)
-            {
-                obj.SetActive(false);
-                uiManager.HideAllPanels();
-                Debug.Log("[ApplyPlacement] El objeto no puede colocarse aquí, intente otra posición.");
-            }
-            else
-            {
-                // Si es una nueva instancia, destruirla directamente
-                Destroy(obj);
-            }
-
-            return;
-        }
-    }
-    /// <summary>
-    /// Intenta posicionar (sin destruir) el objeto `obj` en el hit.
-    /// Devuelve true si la colocación es válida y no colisiona con otros muebles.
-    /// En caso de éxito deja la posición y rotación aplicadas en el objeto.
-    /// En caso de fallo el objeto queda en la posición calculada pero NO se reactiva (si estaba inactivo).
-    /// </summary>
-    private bool TryPlace(GameObject obj, RaycastHit hit)
-    {
-        if (obj == null) return false;
-
-        SelectableObject so = obj.GetComponent<SelectableObject>();
-        Collider placedCollider = obj.GetComponent<Collider>() ?? obj.GetComponentInChildren<Collider>();
-        if (so == null || placedCollider == null) return false;
-
-        // --- 1. Calcular rotación y posición base ---
-        Quaternion targetRotation;
-        bool isFloor = Vector3.Dot(hit.normal, Vector3.up) > 0.9f;
-
-        if (so.placementOrientation == PlacementOrientation.Vertical)
-        {
-            // Piso
-            targetRotation = Quaternion.Euler(0, obj.transform.eulerAngles.y, 0);
-            obj.transform.rotation = targetRotation;
-
-            obj.transform.position = hit.point;
-
-            // Mover hacia arriba en la dirección de la normal
-            float offsetY = placedCollider.bounds.extents.y;
-            obj.transform.position += hit.normal * offsetY;
-        }
-        else
-        {
-            // Pared
-            targetRotation = Quaternion.LookRotation(-hit.normal, Vector3.up);
-            obj.transform.rotation = targetRotation;
-            obj.transform.position = hit.point;
-
-            // Calcular punto más cercano
-            Vector3 closest = placedCollider.ClosestPoint(hit.point);
-            Vector3 correction = hit.point - closest;
-
-            // Si la corrección es mínima, usar fallback con bounds
-            if (correction.sqrMagnitude < 1e-6f)
-            {
-                Vector3 extents = placedCollider.bounds.extents;
-                float depth = Mathf.Abs(Vector3.Dot(extents, hit.normal));
-                correction = hit.normal * depth;
-            }
-
             obj.transform.position += correction;
             obj.transform.position += hit.normal * 0.001f;
         }
 
-        // --- 2. Forzar actualización del collider ---
-        // Esto recalcula los bounds con la nueva posición/rotación antes de hacer OverlapBox
-        Physics.SyncTransforms();
-
-        // --- 3. Comprobar colisiones con otros objetos (ignorar piso/pared) ---
+        // --- 2. Verificar colisiones ---
         Bounds worldBounds = placedCollider.bounds;
-        Vector3 center = worldBounds.center;
-        Vector3 halfExtents = worldBounds.extents;
-
-        Collider[] hits = Physics.OverlapBox(
-            center,
-            halfExtents,
-            obj.transform.rotation,
-            Physics.DefaultRaycastLayers,
-            QueryTriggerInteraction.Ignore
-        );
-
-        int blockingCount = 0;
+        Collider[] hits = Physics.OverlapBox(worldBounds.center, worldBounds.extents, obj.transform.rotation);
         foreach (var h in hits)
         {
             if (h == placedCollider) continue;
             if (h.CompareTag("Floor") || h.CompareTag("Wall")) continue;
-
             if (h.GetComponentInParent<SelectableObject>() != null)
-                blockingCount++;
+            {
+                Debug.Log("[ApplyPlacement] Colisión detectada. Cancelando colocación.");
+                Destroy(obj);
+                return;
+            }
         }
 
-        if (blockingCount > 0)
+        // --- 3. Marcar como obstáculo en NavMesh ---
+        NavmeshUtility.MarkAsObstacle(obj);
+
+        // --- 4. Activar spawner (solo la primera vez) ---
+        CatSpawner spawner = Object.FindAnyObjectByType<CatSpawner>();
+        if (spawner != null)
         {
-            Debug.Log("[TryPlace] Colisión con " + blockingCount + " objetos. Colocación rechazada.");
-            return false;
+            spawner.ActivateSpawner();
         }
 
-        Debug.Log("[TryPlace] Colocación válida.");
-        return true;
+        Debug.Log("[ApplyPlacement] Objeto colocado correctamente.");
     }
+    
     /// <summary>
     /// Intenta posicionar el ghost (activo) en la ubicación determinada por hit.
     /// Devuelve true si la posición candidate es válida (sin colisión con otros SelectableObject).
