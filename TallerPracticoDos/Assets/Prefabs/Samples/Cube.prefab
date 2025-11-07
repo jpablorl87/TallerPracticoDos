@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6824167413178315530}
   - component: {fileID: 7398259857077781160}
   - component: {fileID: 8410348658650277611}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -142,5 +142,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14e84deb3af4a3c47abdd45991a6aaae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DestructibleObject
+  health: 3
   destructionEffect: {fileID: 0}
   destroyDelay: 1
+  hitSound: {fileID: 0}
+  destroySound: {fileID: 0}

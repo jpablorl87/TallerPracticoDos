@@ -116,6 +116,10 @@ MonoBehaviour:
   idleMax: 5
   forcedActionInterval: 10
   exploreRadius: 6
+  interactableMask:
+    serializedVersion: 2
+    m_Bits: 64
+  detectionRadius: 12
 --- !u!114 &4257923754671055101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,9 +132,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78dd98619e9800141bcfffdecfd12b9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatPersonality
-  curiosity: 0.7
-  aggression: 0.3
-  affection: 0.5
+  curiosity: 1
+  aggression: 1
+  affection: 1
   favoriteObjectName: Cube
 --- !u!114 &8662054298585299284
 MonoBehaviour:

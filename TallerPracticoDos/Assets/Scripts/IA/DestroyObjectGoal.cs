@@ -9,10 +9,7 @@ public class DestroyObjectGoal : GOAPGoal
     {
         cat = GetComponent<CatAI>();
         GoalName = "DestroyObject";
-
-        // Se agrega la condición deseada
         AddDesiredState("DestroyObject", true);
-
         Priority = 2f;
     }
 
@@ -20,15 +17,14 @@ public class DestroyObjectGoal : GOAPGoal
     {
         if (cat == null) return 0f;
 
-        // Si el gato detecta objetos cerca, sube prioridad
-        var objs = Physics.OverlapSphere(cat.transform.position, 6f, LayerMask.GetMask("Interactable"));
-        return objs.Length > 0 ? 3f : 0.5f;
+        // Detecta objetos cercanos según el mismo LayerMask
+        var objs = Physics.OverlapSphere(cat.transform.position, cat.detectionRadius, cat.interactableMask);
+        return objs.Length > 0 ? 2f : 0.5f;
     }
 
     public override bool IsAchievable()
     {
-        // Usa el método moderno, sin obsoletos
-        var destructibles = Object.FindObjectsByType<DestructibleObject>(FindObjectsSortMode.None);
-        return destructibles.Length > 0;
+        var objs = Physics.OverlapSphere(transform.position, cat.detectionRadius, cat.interactableMask);
+        return objs.Length > 0;
     }
 }

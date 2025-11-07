@@ -6,8 +6,9 @@ public class CatHitObjectAction : GOAPAction
 {
     private DestructibleObject target;
     private NavMeshAgent agent;
-    private bool destinationSet;
-    private float attackRange = 1.5f;
+    private float attackRange = 1.6f;
+    private float attackCooldown = 1.5f;
+    private float lastAttackTime;
 
     private void Awake()
     {
@@ -19,13 +20,12 @@ public class CatHitObjectAction : GOAPAction
     public override void ResetAction()
     {
         target = null;
-        destinationSet = false;
         IsDone = false;
+        lastAttackTime = 0f;
     }
 
     public override bool CheckProceduralPrecondition(GameObject actor)
     {
-        // Buscar el objeto destructible más cercano
 #if UNITY_2023_2_OR_NEWER
         var all = Object.FindObjectsByType<DestructibleObject>(FindObjectsSortMode.None);
 #else
@@ -49,6 +49,7 @@ public class CatHitObjectAction : GOAPAction
         if (best != null)
         {
             target = best;
+            Target = target.gameObject;
             return true;
         }
 
@@ -58,38 +59,56 @@ public class CatHitObjectAction : GOAPAction
     public override bool Perform(GameObject actor)
     {
         if (IsDone) return true;
-
         if (target == null)
         {
+            Debug.LogWarning($"[CatHitObjectAction] {actor.name} no tiene objetivo válido.");
             IsDone = true;
             return false;
         }
 
-        if (agent == null)
-            agent = actor.GetComponent<NavMeshAgent>();
+        agent ??= actor.GetComponent<NavMeshAgent>();
 
+        // Moverse hacia el objetivo
         if (agent != null && agent.isOnNavMesh)
         {
-            if (!destinationSet)
-            {
-                agent.stoppingDistance = attackRange * 0.9f;
-                agent.SetDestination(target.transform.position);
-                destinationSet = true;
-            }
+            agent.stoppingDistance = attackRange;
+            agent.SetDestination(target.transform.position);
 
             if (agent.pathPending) return true;
 
-            if (agent.remainingDistance > attackRange)
-                return true; // sigue caminando
+            float dist = Vector3.Distance(actor.transform.position, target.transform.position);
+
+            // --- Atacar si está en rango ---
+            if (dist <= attackRange)
+            {
+                if (Time.time - lastAttackTime >= attackCooldown)
+                {
+                    lastAttackTime = Time.time;
+
+                    Debug.Log($"[CatHitObjectAction] {actor.name} ataca {target.name} (distancia {dist:F1})");
+
+                    // --- Aquí está el ataque real ---
+                    target.ApplyDamage(1f);
+
+                    // Si el objeto fue destruido, marcamos la acción como completada
+                    if (target == null || target.Equals(null))
+                    {
+                        Debug.Log($"[CatHitObjectAction] {actor.name} destruyó {target?.name ?? "objeto"}.");
+                        IsDone = true;
+                        return true;
+                    }
+                }
+            }
         }
 
-        // Si llega aquí, ya está en rango: atacar
-        Debug.Log($"[CatHitObjectAction] {actor.name} ataca {target.name}");
+        // Si el objetivo fue destruido por otro gato
+        if (target == null || target.Equals(null))
+        {
+            IsDone = true;
+        }
 
-        target.DestroyObject(); // tu método original
-        IsDone = true;
         return true;
     }
 
-    public override bool RequiresInRange() => false;
+    public override bool RequiresInRange() => true;
 }

@@ -16,7 +16,11 @@ public class CatAI : MonoBehaviour
     public float idleMax = 5f;
     public float forcedActionInterval = 10f;
     public float exploreRadius = 6f;
+    [Header("Detección y combate")]
+    public LayerMask interactableMask;
+    public float detectionRadius = 6f;
 
+    private float lastAttackTime;
     private float timeSinceLastAction;
     private Coroutine idleRoutine;
 
@@ -59,15 +63,43 @@ public class CatAI : MonoBehaviour
             idleRoutine = null;
         }
 
+        // Random entre 0 y 1
         float decision = Random.value;
 
-        if (decision < 0.4f)
+        // --- Probabilidades ---
+        // 0.0 - 0.3 >> Idle
+        // 0.3 - 0.7 >> Walk
+        // 0.7 - 1.0 >> Intentar ataque
+        if (decision < 0.3f)
+        {
             idleRoutine = StartCoroutine(IdleBehavior());
-        else if (decision < 0.8f)
+        }
+        else if (decision < 0.7f)
+        {
             StartCoroutine(WalkRandom());
+        }
         else
+        {
             TryImmediateAttack();
+        }
+
+        // --- Ataque forzado cada ~60s ---
+        if (Time.time % 60f < 1f && Random.value < 0.6f)
+        {
+            Debug.Log($"[CatAI] {name} siente impulso agresivo espontáneo.");
+            TryImmediateAttack();
+        }
+
+        // --- Ataque garantizado cada minuto ---
+        // Si ha pasado más de 60 segundos desde el último ataque, forzar uno.
+        if (Time.time - lastAttackTime > 60f)
+        {
+            Debug.Log($"[CatAI] {name} lleva más de un minuto sin atacar, forzando ataque.");
+            TryImmediateAttack(forceAttack: true);
+        }
     }
+
+
 
     private IEnumerator IdleBehavior()
     {
@@ -103,39 +135,40 @@ public class CatAI : MonoBehaviour
         ElegirNuevaAccion();
     }
 
-    public void TryImmediateAttack()
+    public void TryImmediateAttack(bool forceAttack = false)
     {
-        var destructibles = FindObjectsOfType<DestructibleObject>();
-        if (destructibles.Length == 0)
+        if (isCalm) return;
+
+        Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, detectionRadius, interactableMask);
+        if (nearbyObjects.Length == 0 && !forceAttack)
         {
-            StartCoroutine(WalkRandom());
+            Debug.Log($"[CatAI] {name} no encontró objetivos en rango ({detectionRadius}m).");
             return;
         }
 
-        GameObject closest = null;
-        float bestDist = Mathf.Infinity;
+        GameObject target = nearbyObjects.Length > 0
+            ? nearbyObjects[Random.Range(0, nearbyObjects.Length)].gameObject
+            : null;
 
-        foreach (var d in destructibles)
+        if (target != null)
+            Debug.Log($"[CatAI] {name} detecta {nearbyObjects.Length} objetos y quiere atacar {target.name}.");
+        else
+            Debug.Log($"[CatAI] {name} no tiene objetivo, pero atacará por impulso.");
+
+        // Forzar meta de destrucción
+        agent.SetGoal("DestroyObject", true);
+        lastAttackTime = Time.time;
+
+        // Ataque inmediato si se forza
+        if (forceAttack && target != null)
         {
-            float dist = Vector3.Distance(transform.position, d.transform.position);
-            if (dist < bestDist)
+            var destructible = target.GetComponent<DestructibleObject>();
+            if (destructible != null)
             {
-                bestDist = dist;
-                closest = d.gameObject;
+                Debug.Log($"[CatAI] {name} ejecuta ataque directo a {target.name}.");
+                destructible.DestroyObject();
             }
         }
-
-        if (closest != null)
-        {
-            Debug.Log($"[CatAI] {name} detecta {destructibles.Length} objetos y quiere atacar {closest.name}.");
-            agent.SetGoal("DestroyObject", true);
-        }
-        else
-        {
-            StartCoroutine(IdleBehavior());
-        }
-
-        timeSinceLastAction = 0;
     }
 
     public void CalmCat(float duration)
