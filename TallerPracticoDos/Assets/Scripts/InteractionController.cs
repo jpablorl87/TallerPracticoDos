@@ -48,31 +48,50 @@ public class InteractionController : MonoBehaviour
         inputActions.Gameplay.Tap.performed -= OnTap;
         inputActions.Gameplay.Disable();
     }
-
+    private void Update()
+    {
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            Ray ray = mainCamera.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
+            if (Physics.Raycast(ray, out var hit, 100f))
+            {
+                Debug.Log($"[TEST] Spacebar ray hit {hit.collider.name} at {hit.point}");
+                Debug.DrawLine(ray.origin, hit.point, Color.green, 2f);
+            }
+            else
+            {
+                Debug.LogWarning("[TEST] Spacebar ray hit nothing!");
+            }
+        }
+    }
     private void OnTap(InputAction.CallbackContext ctx)
     {
-        if (IsPointerOverUI()) return;
+        Vector2 screenPos = GetCurrentPointerPosition();
+        Debug.Log($"[InteractionController] OnTap - screenPos: {screenPos} (touch? {Touchscreen.current != null})");
 
-        if (isMovingObject && ghostObject == null)
+        if (IsPointerOverUI(screenPos))
         {
-            // Resetea modo mover si algo raro pasó
-            isMovingObject = false;
-            placedObject?.SetActive(true);
+            Debug.Log("[InteractionController] Tap sobre UI - ignorando.");
             return;
         }
 
-        Vector2 screenPos = GetCurrentPointerPosition();
         Ray ray = mainCamera.ScreenPointToRay(screenPos);
-        RaycastHit hit;
+        Debug.Log($"[InteractionController] Ray origin: {ray.origin}, dir: {ray.direction}");
 
-        // Raycast general
-        if (!Physics.Raycast(ray, out hit))
+        // Dibuja el rayo en la escena durante 3 segundos
+        Debug.DrawRay(ray.origin, ray.direction * 20f, Color.red, 3f);
+
+        // --- Chequeo de raycast ---
+        RaycastHit hit;
+        bool rayHit = Physics.Raycast(ray, out hit, 100f, ~0, QueryTriggerInteraction.Ignore);
+
+        if (rayHit)
         {
-            if (placedObject != null)
-            {
-                placedObject = null;
-                uiManager.HideAllPanels();
-            }
+            Debug.Log($"[InteractionController] Raycast golpeó: {hit.collider.name} en capa {LayerMask.LayerToName(hit.collider.gameObject.layer)} | Punto: {hit.point}");
+        }
+        else
+        {
+            Debug.LogWarning("[InteractionController] Raycast no golpeó nada. Verifica colliders y capas físicas.");
             return;
         }
 
@@ -80,7 +99,6 @@ public class InteractionController : MonoBehaviour
         CatAI cat = hit.collider.GetComponentInParent<CatAI>();
         if (cat != null)
         {
-            // Duración configurable por inspector en CatAI, aquí lo sobrescribimos con random
             float calmFor = Random.Range(20f, 60f);
             cat.CalmCat(calmFor);
             Debug.Log("[InteractionController] Gato calmado por clic/tap.");
@@ -151,10 +169,11 @@ public class InteractionController : MonoBehaviour
                 pendingDecorationPrefab = null;
                 uiManager.HideAllPanels();
 
-                Debug.Log("[Decorate] Decoración aplicada.");
+                Debug.Log("[Decorate] Decoración aplicada en " + soHit.name);
                 return;
             }
 
+            Debug.LogWarning("[Decorate] No se pudo decorar, superficie no válida.");
             waitingToDecorate = false;
             pendingDecorationPrefab = null;
             uiManager.HideAllPanels();
@@ -176,9 +195,10 @@ public class InteractionController : MonoBehaviour
         {
             placedObject = null;
             uiManager.HideAllPanels();
-            Debug.Log("[Tap] Clic fuera.");
+            Debug.Log("[Tap] Clic fuera (deselección).");
         }
     }
+
 
 
 
@@ -328,19 +348,48 @@ public class InteractionController : MonoBehaviour
         uiManager.HideAllPanels();
     }
 
-    private bool IsPointerOverUI()
+    private bool IsPointerOverUI(Vector2 screenPos)
     {
-        return EventSystem.current.IsPointerOverGameObject(Pointer.current?.deviceId ?? -1);
+        // Protege por si no hay EventSystem (evita NRE)
+        if (EventSystem.current == null) return false;
+
+        // Construimos un PointerEventData con la posición actual y preguntamos al EventSystem
+        PointerEventData ped = new PointerEventData(EventSystem.current);
+        ped.position = screenPos;
+
+        var results = new System.Collections.Generic.List<RaycastResult>();
+        EventSystem.current.RaycastAll(ped, results);
+        return results.Count > 0;
     }
 
     private Vector2 GetCurrentPointerPosition()
     {
-#if UNITY_ANDROID || UNITY_IOS
-        return Touchscreen.current?.primaryTouch.position.ReadValue() ?? Vector2.zero;
-#else
-        return Mouse.current?.position.ReadValue() ?? Vector2.zero;
-#endif
+        // Caso 1: Mouse (Editor o PC)
+        if (Mouse.current != null && Mouse.current.position.IsActuated())
+        {
+            Vector2 pos = Mouse.current.position.ReadValue();
+            Debug.Log($"[Input] Mouse position: {pos}");
+            return pos;
+        }
+
+        // Caso 2: Pantalla táctil (Android o iOS)
+        if (Touchscreen.current != null)
+        {
+            var touch = Touchscreen.current.primaryTouch;
+            if (touch.press.isPressed)
+            {
+                Vector2 pos = touch.position.ReadValue();
+                Debug.Log($"[Input] Touch position: {pos}");
+                return pos;
+            }
+        }
+
+        // Caso 3: Fallback (posición centro de pantalla)
+        Vector2 fallback = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        Debug.LogWarning($"[Input] Ninguna entrada activa, usando centro: {fallback}");
+        return fallback;
     }
+
 
     /// <summary>
     /// Verifica si el objeto se puede colocar en la superficie golpeada por el Raycast.
