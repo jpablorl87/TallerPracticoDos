@@ -20,7 +20,6 @@ GameObject:
   - component: {fileID: 1032937549807953432}
   - component: {fileID: 6603474247119124806}
   - component: {fileID: 7878581115831450524}
-  - component: {fileID: 7670539067125466486}
   m_Layer: 0
   m_Name: SampleCat
   m_TagString: Untagged
@@ -224,18 +223,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.5, y: 0.5, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &7670539067125466486
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 141373326842552989}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9464a77c144c0ff4c97ee4003779cb59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GOAP.GOAPAgent
 --- !u!1 &203431663066731291
 GameObject:
   m_ObjectHideFlags: 0

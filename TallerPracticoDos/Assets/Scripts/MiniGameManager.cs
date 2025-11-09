@@ -35,6 +35,7 @@ public class MiniGameManager : MonoBehaviour
     /// <param name="sceneName">Nombre exacto de la escena del minijuego.</param>
     public void StartMiniGame(string sceneName)
     {
+        hasFinished = false;
         CoinsEarned = 0; // Reinicia las monedas para este minijuego
         currentMiniGameScene = sceneName;
         SceneManager.LoadScene(sceneName);

@@ -2599,6 +2599,7 @@ GameObject:
   - component: {fileID: 828409713}
   - component: {fileID: 828409712}
   - component: {fileID: 828409716}
+  - component: {fileID: 828409717}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Floor
@@ -2731,6 +2732,18 @@ MonoBehaviour:
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 1c211cb9650246c4f8f0a01b80a0dd3d, type: 2}
   m_BuildHeightMesh: 0
+--- !u!114 &828409717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828409711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a252813f529c2ef43981a4f7a79e6cd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NavMeshLoader
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

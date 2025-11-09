@@ -5,16 +5,16 @@ using UnityEngine.AI;
 public class CatSpawner : MonoBehaviour
 {
     [Header("Cat Prefabs")]
-    public List<GameObject> catPrefabs = new List<GameObject>();
+    [SerializeField] private List<GameObject> catPrefabs = new List<GameObject>();
 
     [Header("Dependencies")]
-    public PlayerMetrics playerMetrics;
+    [SerializeField] private PlayerMetrics playerMetrics;
 
     [Header("Spawn Settings")]
-    public int maxCats = 5;
-    public float checkInterval = 5f;
-    public float spawnRadius = 15f;
-    public Transform spawnCenter;
+    [SerializeField] private int maxCats = 5;
+    [SerializeField] private float checkInterval = 5f;
+    [SerializeField] private float spawnRadius = 15f;
+    [SerializeField] private Transform spawnCenter;
 
     private readonly List<GameObject> activeCats = new();
     private float timer;

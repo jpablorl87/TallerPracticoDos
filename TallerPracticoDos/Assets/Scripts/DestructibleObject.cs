@@ -18,6 +18,8 @@ public class DestructibleObject : MonoBehaviour
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     /// <summary>

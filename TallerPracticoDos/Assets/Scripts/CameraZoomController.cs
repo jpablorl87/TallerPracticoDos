@@ -168,24 +168,32 @@ public class CameraZoomController : MonoBehaviour
     // Se activa cuando se presiona el botón o se toca la pantalla.
     private void OnDragStarted(InputAction.CallbackContext context)
     {
-        // Lee la posición inicial del cursor y activa el flag de arrastre.
         lastDragPosition = dragPositionAction.ReadValue<Vector2>();
         isDragging = true;
+
+        Debug.Log($"[CameraZoomController] Drag iniciado | Posición inicial: {lastDragPosition} | canPan={canPan}");
     }
 
     // Se activa cuando se suelta el botón o el dedo de la pantalla.
     private void OnDragCanceled(InputAction.CallbackContext context)
     {
-        // Desactiva el flag de arrastre.
         isDragging = false;
+        Debug.Log("[CameraZoomController] Drag finalizado.");
     }
 
     // Método que gestiona el movimiento de la cámara en cada frame.
     private void HandleDragPan()
     {
         // Si no se permite el pan o no se está arrastrando, sale del método.
-        if (!canPan || !isDragging)
+        if (!canPan)
         {
+            Debug.Log("[CameraZoomController] Pan no permitido: zoom máximo o cámara reseteada.");
+            return;
+        }
+
+        if (!isDragging)
+        {
+            // Para no saturar el log, avisamos solo una vez por segundo
             return;
         }
 
@@ -193,49 +201,25 @@ public class CameraZoomController : MonoBehaviour
         Vector2 currentScreenPosition = dragPositionAction.ReadValue<Vector2>();
         Vector2 screenDelta = currentScreenPosition - lastDragPosition;
 
+        Debug.Log($"[CameraZoomController] Drag activo | PosActual={currentScreenPosition} | Delta={screenDelta} | PanSpeed={panSpeed}");
+
         // 2. Cálculo del movimiento.
-        // Se usa transform.right y transform.up, que son locales a la rotación de la cámara.
         Vector3 panMovement = -transform.right * screenDelta.x * panSpeed + -transform.up * screenDelta.y * panSpeed;
 
         // 3. Aplica el movimiento a la posición del MUNDO.
         transform.position += panMovement;
 
         // 4. --- LÓGICA DE CLAMPING FIJO EN POSICIÓN LOCAL CON CORRECCIÓN DE ZOOM ---
-
-        // Obtenemos la posición local (que es la que queremos limitar).
         Vector3 localPosition = transform.localPosition;
 
-        // Obtener la mitad del campo de visión (Viewport) en el mundo.
-        // HalfHeight es el tamaño actual de la cámara ortográfica.
         float halfHeight = mainCamera.orthographicSize;
-        // HalfWidth es el tamaño de la cámara en X, ajustado por el aspect ratio.
         float halfWidth = halfHeight * mainCamera.aspect;
 
-        // a. Aplicar límites al Eje X Local, compensando por el Viewport.
-        //    Min: panLimitMin.x + halfWidth (empuja el límite hacia adentro)
-        //    Max: panLimitMax.x - halfWidth (empuja el límite hacia adentro)
-        localPosition.x = Mathf.Clamp(
-            localPosition.x,
-            panLimitMin.x + halfWidth,
-            panLimitMax.x - halfWidth
-        );
-
-        // b. Aplicar límites al Eje Y Local, compensando por el Viewport.
-        //    Min: panLimitMin.y + halfHeight (empuja el límite hacia adentro)
-        //    Max: panLimitMax.y - halfHeight (empuja el límite hacia adentro)
-        localPosition.y = Mathf.Clamp(
-            localPosition.y,
-            panLimitMin.y + halfHeight,
-            panLimitMax.y - halfHeight
-        );
-
-        // c. Mantenemos el Eje Z Local Fijo.
+        localPosition.x = Mathf.Clamp(localPosition.x, panLimitMin.x + halfWidth, panLimitMax.x - halfWidth);
+        localPosition.y = Mathf.Clamp(localPosition.y, panLimitMin.y + halfHeight, panLimitMax.y - halfHeight);
         localPosition.z = initialLocalPosition.z;
 
-        // 5. Reasignamos la posición local con los límites aplicados.
         transform.localPosition = localPosition;
-
-        // --- FIN: LÓGICA DE CLAMPING ---
 
         // 6. Actualizar la posición para el siguiente frame
         lastDragPosition = currentScreenPosition;

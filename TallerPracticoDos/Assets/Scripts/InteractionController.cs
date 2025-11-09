@@ -364,30 +364,16 @@ public class InteractionController : MonoBehaviour
 
     private Vector2 GetCurrentPointerPosition()
     {
-        // Caso 1: Mouse (Editor o PC)
-        if (Mouse.current != null && Mouse.current.position.IsActuated())
-        {
-            Vector2 pos = Mouse.current.position.ReadValue();
-            Debug.Log($"[Input] Mouse position: {pos}");
-            return pos;
-        }
-
-        // Caso 2: Pantalla táctil (Android o iOS)
-        if (Touchscreen.current != null)
-        {
-            var touch = Touchscreen.current.primaryTouch;
-            if (touch.press.isPressed)
-            {
-                Vector2 pos = touch.position.ReadValue();
-                Debug.Log($"[Input] Touch position: {pos}");
-                return pos;
-            }
-        }
-
-        // Caso 3: Fallback (posición centro de pantalla)
-        Vector2 fallback = new Vector2(Screen.width / 2f, Screen.height / 2f);
-        Debug.LogWarning($"[Input] Ninguna entrada activa, usando centro: {fallback}");
-        return fallback;
+#if UNITY_EDITOR
+        // Si estás en el editor (sin importar la plataforma activa), usa siempre el mouse
+        return Mouse.current?.position.ReadValue() ?? Vector2.zero;
+#else
+    // En dispositivo real (Android/iOS), usa el toque
+    if (Touchscreen.current != null)
+        return Touchscreen.current.primaryTouch.position.ReadValue();
+    else
+        return Mouse.current?.position.ReadValue() ?? Vector2.zero;
+#endif
     }
 
 
@@ -480,10 +466,15 @@ public class InteractionController : MonoBehaviour
         NavmeshUtility.MarkAsObstacle(obj);
 
         // --- 4. Activar spawner (solo la primera vez) ---
-        CatSpawner spawner = Object.FindAnyObjectByType<CatSpawner>();
+        CatSpawner spawner = Object.FindAnyObjectByType<CatSpawner>(FindObjectsInactive.Include);
         if (spawner != null)
         {
+            spawner.gameObject.SetActive(true);
             spawner.ActivateSpawner();
+        }
+        else
+        {
+            Debug.LogWarning("[ApplyPlacement] No se encontró CatSpawner en la escena.");
         }
 
         Debug.Log("[ApplyPlacement] Objeto colocado correctamente.");
