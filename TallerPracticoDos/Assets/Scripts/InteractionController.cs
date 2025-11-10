@@ -485,7 +485,7 @@ public class InteractionController : MonoBehaviour
             spawner.gameObject.SetActive(true);
         }
 
-        // Activamos el spawner normalmente
+        // Activamos el spawner normalmente... Si le da la gana de activarse por fin!
         spawner.ActivateSpawner();
         Debug.Log("[ApplyPlacement] CatSpawner encontrado y activado correctamente.");
 
