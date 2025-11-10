@@ -467,19 +467,31 @@ public class InteractionController : MonoBehaviour
 
         // --- 4. Activar spawner (solo la primera vez) ---
         CatSpawner spawner = Object.FindAnyObjectByType<CatSpawner>(FindObjectsInactive.Include);
-        if (spawner != null)
+
+        if (spawner == null)
         {
+            // Evitar duplicados o instancias sin referencias
+            Debug.LogError("[ApplyPlacement] ERROR: No se encontró CatSpawner en la escena. " +
+                           "Debe existir uno activo antes de iniciar el juego. " +
+                           "Verifica que la escena principal (SampleAICatsScene) contenga el objeto CatSpawner y esté activo.");
+
+            return; //  Salimos sin intentar crear uno vacío
+        }
+
+        // Si el spawner existe, aseguramos que esté activo y listo
+        if (!spawner.gameObject.activeSelf)
+        {
+            Debug.LogWarning("[ApplyPlacement] CatSpawner estaba desactivado, reactivando...");
             spawner.gameObject.SetActive(true);
-            spawner.ActivateSpawner();
         }
-        else
-        {
-            Debug.LogWarning("[ApplyPlacement] No se encontró CatSpawner en la escena.");
-        }
+
+        // Activamos el spawner normalmente
+        spawner.ActivateSpawner();
+        Debug.Log("[ApplyPlacement] CatSpawner encontrado y activado correctamente.");
 
         Debug.Log("[ApplyPlacement] Objeto colocado correctamente.");
     }
-    
+
     /// <summary>
     /// Intenta posicionar el ghost (activo) en la ubicación determinada por hit.
     /// Devuelve true si la posición candidate es válida (sin colisión con otros SelectableObject).
