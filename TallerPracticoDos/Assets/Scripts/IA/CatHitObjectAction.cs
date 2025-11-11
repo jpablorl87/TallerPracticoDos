@@ -2,109 +2,131 @@ using UnityEngine;
 using UnityEngine.AI;
 using GOAP;
 
+[RequireComponent(typeof(Animator), typeof(NavMeshAgent))]
 public class CatHitObjectAction : GOAPAction
 {
+    [Header("Attack Settings")]
+    [SerializeField] private float attackRange = 1.8f;
+    [SerializeField] private float attackCooldown = 1.2f;
+    [SerializeField] private float lookBeforeAttack = 1.8f;
+    [SerializeField] private float attackAngleTolerance = 60f;
+    [SerializeField] private int hitsToDestroy = 2;
+    [SerializeField] private float detectionRadius = 12f;
+
     private DestructibleObject target;
     private NavMeshAgent agent;
-    private float attackRange = 1.6f;
-    private float attackCooldown = 1.5f;
+    private Animator animator;
+
+    private float lookTimer;
     private float lastAttackTime;
+    private int localHits;
 
     private void Awake()
     {
-        AddPrecondition("DestroyObject", true);
         AddEffect("DestroyObject", true);
         Cost = 2f;
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
     }
 
     public override void ResetAction()
     {
         target = null;
+        Target = null;
         IsDone = false;
+        lookTimer = 0f;
         lastAttackTime = 0f;
+        localHits = 0;
     }
 
     public override bool CheckProceduralPrecondition(GameObject actor)
     {
-#if UNITY_2023_2_OR_NEWER
-        var all = Object.FindObjectsByType<DestructibleObject>(FindObjectsSortMode.None);
-#else
         var all = Object.FindObjectsOfType<DestructibleObject>();
-#endif
-        if (all.Length == 0) return false;
+        if (all == null || all.Length == 0) return false;
 
         float bestDist = Mathf.Infinity;
         DestructibleObject best = null;
+
         foreach (var d in all)
         {
-            if (d == null) continue;
+            if (d == null || d.IsDestroyed) continue;
             float dist = Vector3.Distance(actor.transform.position, d.transform.position);
-            if (dist < bestDist)
+            if (dist < bestDist && dist <= detectionRadius)
             {
                 bestDist = dist;
                 best = d;
             }
         }
 
-        if (best != null)
-        {
-            target = best;
-            Target = target.gameObject;
-            return true;
-        }
-
-        return false;
+        if (best == null) return false;
+        target = best;
+        Target = target.gameObject;
+        Debug.Log($"[CatHitObjectAction] {actor.name} asignó objetivo: {target.name} (dist={bestDist:F2})");
+        return true;
     }
 
     public override bool Perform(GameObject actor)
     {
-        if (IsDone) return true;
-        if (target == null)
+        if (target == null || target.IsDestroyed)
         {
-            Debug.LogWarning($"[CatHitObjectAction] {actor.name} no tiene objetivo válido.");
-            IsDone = true;
-            return false;
-        }
-
-        agent ??= actor.GetComponent<NavMeshAgent>();
-
-        // Moverse hacia el objetivo
-        if (agent != null && agent.isOnNavMesh)
-        {
-            agent.stoppingDistance = attackRange;
-            agent.SetDestination(target.transform.position);
-
-            if (agent.pathPending) return true;
-
-            float dist = Vector3.Distance(actor.transform.position, target.transform.position);
-
-            // --- Atacar si está en rango ---
-            if (dist <= attackRange)
+            if (!CheckProceduralPrecondition(actor))
             {
-                if (Time.time - lastAttackTime >= attackCooldown)
-                {
-                    lastAttackTime = Time.time;
-
-                    Debug.Log($"[CatHitObjectAction] {actor.name} ataca {target.name} (distancia {dist:F1})");
-
-                    // --- Aquí está el ataque real ---
-                    target.ApplyDamage(1f);
-
-                    // Si el objeto fue destruido, marcamos la acción como completada
-                    if (target == null || target.Equals(null))
-                    {
-                        Debug.Log($"[CatHitObjectAction] {actor.name} destruyó {target?.name ?? "objeto"}.");
-                        IsDone = true;
-                        return true;
-                    }
-                }
+                IsDone = true;
+                return false;
             }
         }
 
-        // Si el objetivo fue destruido por otro gato
-        if (target == null || target.Equals(null))
+        if (!agent.isOnNavMesh) return false;
+
+        float distance = Vector3.Distance(actor.transform.position, target.transform.position);
+        agent.stoppingDistance = attackRange;
+        agent.SetDestination(target.transform.position);
+
+        if (distance > attackRange)
         {
-            IsDone = true;
+            animator?.SetTrigger("Walk");
+            return true;
+        }
+
+        Vector3 dir = (target.transform.position - actor.transform.position);
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.01f)
+        {
+            Quaternion desired = Quaternion.LookRotation(dir);
+            actor.transform.rotation = Quaternion.Slerp(actor.transform.rotation, desired, Time.deltaTime * 6f);
+        }
+
+        float angle = Vector3.Angle(actor.transform.forward, dir);
+        if (angle > attackAngleTolerance)
+        {
+            animator?.SetTrigger("Idle");
+            return true;
+        }
+
+        lookTimer += Time.deltaTime;
+        if (lookTimer >= lookBeforeAttack && Time.time - lastAttackTime >= attackCooldown)
+        {
+            lastAttackTime = Time.time;
+            lookTimer = 0f;
+            localHits++;
+
+            animator?.SetTrigger("Attack");
+            target.TakeHit();
+
+            Debug.Log($"[CatHitObjectAction] {actor.name} golpeó {target.name} (hit {localHits})");
+
+            if (target.IsDestroyed)
+            {
+                Debug.Log($"[CatHitObjectAction] {actor.name} destruyó {target.name}");
+                IsDone = true;
+
+                var catAI = actor.GetComponent<CatAI>();
+                if (catAI != null)
+                    catAI.CalmCat(Random.Range(5f, 10f)); // pausa tras destrucción
+            }
+
+            if (localHits >= hitsToDestroy)
+                IsDone = true;
         }
 
         return true;

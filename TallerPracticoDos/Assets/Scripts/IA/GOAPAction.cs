@@ -16,6 +16,9 @@ namespace GOAP
         // Indica si ya se cumplió la acción
         public bool IsDone { get; protected set; }
 
+        // Objetivo o destino (opcional)
+        public GameObject Target { get; protected set; }
+
         // Asignar precondiciones o efectos
         protected void AddPrecondition(string key, bool value) => Preconditions[key] = value;
         protected void AddEffect(string key, bool value) => Effects[key] = value;
@@ -26,7 +29,14 @@ namespace GOAP
         public abstract bool RequiresInRange();
         public abstract void ResetAction();
 
-        // Objetivo o destino (opcional)
-        public GameObject Target { get; protected set; }
+        // Helper: resetea Target y estado básico
+        protected void ClearTarget()
+        {
+            Target = null;
+            IsDone = false;
+        }
+
+        // Helper seguro para comprobar "Unity null" (también cubre objetos ya destruidos)
+        protected static bool IsNullOrDestroyed(Object obj) => obj == null;
     }
 }

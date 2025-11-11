@@ -1,191 +1,221 @@
 using System.Collections;
 using UnityEngine;
 using GOAP;
+using UnityEngine.AI;
 
-[RequireComponent(typeof(GOAPAgent))]
-[RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
+[RequireComponent(typeof(GOAPAgent), typeof(NavMeshAgent))]
 public class CatAI : MonoBehaviour
 {
+    [Header("Detection (usado por DestroyObjectGoal / acciones)")]
+    [SerializeField] private float detectionRadius = 12f;
+    [SerializeField] private LayerMask interactableMask = ~0;
+
+    // --- Exposición segura para otros scripts (lectura solamente) ---
+    public float DetectionRadius => detectionRadius;
+    public LayerMask InteractableMask => interactableMask;
+
+    [Header("Behavior Settings")]
+    [SerializeField] private float maxIdleTime = 60f;     // tiempo máximo antes de forzar ataque
+    [SerializeField] private float forcedAttackCooldown = 10f;
+    [SerializeField] private float attackChance = 0.25f;          // Probabilidad de atacar cuando hay objetivo
+    [SerializeField] private Vector2 calmDurationRange = new Vector2(4f, 8f); // Rango aleatorio de calma tras atacar
+
+    // Calm state (métodos públicos Calm() / CalmCat(float) que otras partes pueden llamar)
+    public bool IsCalm { get; private set; } = false;
+    private Coroutine calmCoroutine;
+
     private GOAPAgent agent;
-    private UnityEngine.AI.NavMeshAgent nav;
-    private bool isIdle;
-    private bool isCalm;
+    private NavMeshAgent navMeshAgent;
 
-    [Header("Comportamiento general")]
-    public float idleMin = 2f;
-    public float idleMax = 5f;
-    public float forcedActionInterval = 10f;
-    public float exploreRadius = 6f;
-    [Header("Detección y combate")]
-    public LayerMask interactableMask;
-    public float detectionRadius = 6f;
-
-    private float lastAttackTime;
-    private float timeSinceLastAction;
-    private Coroutine idleRoutine;
-
-    public bool IsCalm => isCalm;
+    private float idleTimer;
+    private float lastForcedAttackTime;
 
     private void Awake()
     {
         agent = GetComponent<GOAPAgent>();
-        nav = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
     private void Start()
     {
-        Debug.Log($"[CatAI] {name} iniciado con {agent.AvailableActions.Count} acciones GOAP.");
-        ElegirNuevaAccion();
-    }
-
-    private void Update()
-    {
-        if (isCalm) return;
-
-        timeSinceLastAction += Time.deltaTime;
-
-        if (!isIdle && timeSinceLastAction > forcedActionInterval)
+        if (agent == null)
         {
-            Debug.Log($"[CatAI] {name} lleva mucho tiempo quieto, forzando acción...");
-            ElegirNuevaAccion();
-            timeSinceLastAction = 0;
-        }
-
-        if (!agent.HasPlan && !isIdle)
-            ElegirNuevaAccion();
-    }
-
-    private void ElegirNuevaAccion()
-    {
-        if (idleRoutine != null)
-        {
-            StopCoroutine(idleRoutine);
-            idleRoutine = null;
-        }
-
-        // Random entre 0 y 1
-        float decision = Random.value;
-
-        // --- Probabilidades ---
-        // 0.0 - 0.3 >> Idle
-        // 0.3 - 0.7 >> Walk
-        // 0.7 - 1.0 >> Intentar ataque
-        if (decision < 0.3f)
-        {
-            idleRoutine = StartCoroutine(IdleBehavior());
-        }
-        else if (decision < 0.7f)
-        {
-            StartCoroutine(WalkRandom());
-        }
-        else
-        {
-            TryImmediateAttack();
-        }
-
-        // --- Ataque forzado cada ~60s ---
-        if (Time.time % 60f < 1f && Random.value < 0.6f)
-        {
-            Debug.Log($"[CatAI] {name} siente impulso agresivo espontáneo.");
-            TryImmediateAttack();
-        }
-
-        // --- Ataque garantizado cada minuto ---
-        // Si ha pasado más de 60 segundos desde el último ataque, forzar uno.
-        if (Time.time - lastAttackTime > 60f)
-        {
-            Debug.Log($"[CatAI] {name} lleva más de un minuto sin atacar, forzando ataque.");
-            TryImmediateAttack(forceAttack: true);
-        }
-    }
-
-
-
-    private IEnumerator IdleBehavior()
-    {
-        isIdle = true;
-        float wait = Random.Range(idleMin, idleMax);
-        Debug.Log($"[CatAI] {name} está idle por {wait:F1}s.");
-        yield return new WaitForSeconds(wait);
-        isIdle = false;
-        timeSinceLastAction = 0;
-        ElegirNuevaAccion();
-    }
-
-    private IEnumerator WalkRandom()
-    {
-        if (nav == null || !nav.isOnNavMesh)
-        {
-            Debug.LogWarning($"[CatAI] {name} no puede moverse (sin NavMesh).");
-            yield break;
-        }
-
-        Vector3 randomDirection = Random.insideUnitSphere * exploreRadius;
-        randomDirection += transform.position;
-
-        if (UnityEngine.AI.NavMesh.SamplePosition(randomDirection, out var hit, exploreRadius, UnityEngine.AI.NavMesh.AllAreas))
-        {
-            nav.SetDestination(hit.position);
-            Debug.Log($"[CatAI] {name} camina hacia {hit.position}.");
-        }
-
-        yield return new WaitUntil(() => !nav.pathPending && nav.remainingDistance <= nav.stoppingDistance);
-        Debug.Log($"[CatAI] {name} llegó a destino.");
-        timeSinceLastAction = 0;
-        ElegirNuevaAccion();
-    }
-
-    public void TryImmediateAttack(bool forceAttack = false)
-    {
-        if (isCalm) return;
-
-        Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, detectionRadius, interactableMask);
-        if (nearbyObjects.Length == 0 && !forceAttack)
-        {
-            Debug.Log($"[CatAI] {name} no encontró objetivos en rango ({detectionRadius}m).");
+            Debug.LogError($"[CatAI] {name} no tiene GOAPAgent.");
+            enabled = false;
             return;
         }
 
-        GameObject target = nearbyObjects.Length > 0
-            ? nearbyObjects[Random.Range(0, nearbyObjects.Length)].gameObject
-            : null;
+        Debug.Log($"[CatAI] {name} iniciado. detectionRadius={detectionRadius}");
+        StartCoroutine(BehaviourLoop());
+    }
 
-        if (target != null)
-            Debug.Log($"[CatAI] {name} detecta {nearbyObjects.Length} objetos y quiere atacar {target.name}.");
-        else
-            Debug.Log($"[CatAI] {name} no tiene objetivo, pero atacará por impulso.");
-
-        // Forzar meta de destrucción
-        agent.SetGoal("DestroyObject", true);
-        lastAttackTime = Time.time;
-
-        // Ataque inmediato si se forza
-        if (forceAttack && target != null)
+    private IEnumerator BehaviourLoop()
+    {
+        while (true)
         {
-            var destructible = target.GetComponent<DestructibleObject>();
-            if (destructible != null)
+            Collider[] found = Physics.OverlapSphere(transform.position, detectionRadius, interactableMask);
+            bool hasTarget = found.Length > 0;
+
+            // Log detallado de detección
+            if (hasTarget)
             {
-                Debug.Log($"[CatAI] {name} ejecuta ataque directo a {target.name}.");
-                destructible.DestroyObject();
+                string names = "";
+                foreach (var c in found) names += c.gameObject.name + ", ";
+                Debug.Log($"[CatAI] Detectados {found.Length} interactables cerca de {name}: {names}");
+            }
+            else
+            {
+                Debug.Log($"[CatAI] No se detectaron interactables cerca de {name} (radius={detectionRadius}).");
+            }
+
+            // Intento de actualizar world state en el GOAPAgent
+            if (agent != null)
+            {
+                agent.SetWorldState("HasTarget", hasTarget);
+                Debug.Log($"[CatAI] Llamó agent.SetWorldState('HasTarget', {hasTarget})");
+            }
+            else
+            {
+                Debug.LogWarning($"[CatAI] agent es NULL en {name} cuando intenta SetWorldState.");
+            }
+
+            // Si hay objetivo cercano y no estamos calmados, solicitar ataque
+            if (hasTarget && !IsCalm)
+            {
+                Debug.Log($"[CatAI] hasTarget && !IsCalm -> llamando TryImmediateAttack en {name}.");
+                TryImmediateAttack();
+            }
+
+            // Idle aleatorio
+            float idleDuration = Random.Range(2f, 5f);
+            Debug.Log($"[CatAI] {name} idle {idleDuration:F1}s.");
+            float timer = 0f;
+            while (timer < idleDuration)
+            {
+                // si estamos calmados no hacemos nada especial, solo esperamos
+                timer += Time.deltaTime;
+                idleTimer += Time.deltaTime;
+
+                // Forzar ataque si lleva mucho tiempo sin atacar y no está calm
+                if (!IsCalm && idleTimer > maxIdleTime && Time.time - lastForcedAttackTime > forcedAttackCooldown)
+                {
+                    Debug.Log($"[CatAI] {name} lleva >{maxIdleTime}s sin atacar, forzando intento.");
+                    lastForcedAttackTime = Time.time;
+                    TryImmediateAttack(force: true);
+                    idleTimer = 0f;
+                    // tras forzar un ataque continuamos el loop (el GOAPAgent buscará plan)
+                    break;
+                }
+
+                yield return null;
+            }
+
+            // Pequeña probabilidad de caminar en vez de volver a idle
+            if (!IsCalm && Random.value > 0.5f)
+            {
+                yield return StartCoroutine(WalkRandomRoutine());
             }
         }
     }
 
-    public void CalmCat(float duration)
+    private IEnumerator WalkRandomRoutine()
     {
-        if (isCalm) return;
-        StartCoroutine(CalmRoutine(duration));
+        Vector3 randomDestination = transform.position + Random.insideUnitSphere * 4f;
+        randomDestination.y = transform.position.y;
+
+        if (NavMesh.SamplePosition(randomDestination, out var hit, 4f, NavMesh.AllAreas))
+        {
+            if (navMeshAgent != null && navMeshAgent.isOnNavMesh)
+            {
+                navMeshAgent.SetDestination(hit.position);
+                Debug.Log($"[CatAI] {name} caminando a {hit.position}.");
+
+                while (navMeshAgent.pathPending || navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance)
+                    yield return null;
+            }
+            else
+            {
+                Debug.LogWarning($"[CatAI] navMeshAgent no disponible o no onNavMesh en {name}.");
+            }
+        }
+
+        yield return null;
     }
 
-    private IEnumerator CalmRoutine(float duration)
+    /// <summary>
+    /// Forzar objetivo/ataque inmediato: pide al GOAPAgent que replantee con la meta DestroyObject.
+    /// No realizará la solicitud si el gato está calmado (a menos que 'force' sea true).
+    /// </summary>
+    public void TryImmediateAttack(bool force = false)
     {
-        isCalm = true;
-        nav.isStopped = true;
-        Debug.Log($"[CatAI] {name} calmado por {duration:F1}s.");
-        yield return new WaitForSeconds(duration);
-        nav.isStopped = false;
-        isCalm = false;
-        Debug.Log($"[CatAI] {name} vuelve a la acción.");
-        ElegirNuevaAccion();
+        if (IsCalm && !force)
+        {
+            Debug.Log($"[CatAI] {name} está calmado; no forzar ataque.");
+            return;
+        }
+
+        if (agent == null)
+        {
+            Debug.LogError($"[CatAI] agent es NULL en TryImmediateAttack() de {name}.");
+            return;
+        }
+
+        // logging adicional: listar acciones conocidas por el GOAPAgent (si está expuesto)
+        try
+        {
+            var actions = agent.availableActions;
+            Debug.Log($"[CatAI] GOAPAgent tiene {actions?.Count ?? 0} acciones registradas.");
+            if (actions != null)
+            {
+                foreach (var a in actions)
+                {
+                    Debug.Log($"[CatAI] - acción registrada: {(a != null ? a.GetType().Name : "NULL")}");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[CatAI] No se pudo leer availableActions del GOAPAgent: {ex.Message}");
+        }
+
+        // Probabilidad de atacar (comportamiento impredecible)
+        if (!force && Random.value > attackChance)
+        {
+            Debug.Log($"[CatAI] {name} decidió no atacar esta vez (probabilidad).");
+            return;
+        }
+
+        // actualizar el estado de mundo para indicar que hay objetivo (si es cierto se detectará en CheckProceduralPrecondition)
+        agent.SetWorldState("HasTarget", true);
+        agent.SetGoal("DestroyObject", true);
+
+        Debug.Log($"[CatAI] {name} solicitó meta 'DestroyObject' (force={force}).");
+
+        // aplicamos una calma corta después de solicitar la meta para evitar replanificaciones spam
+        CalmCatForSeconds(Random.Range(calmDurationRange.x, calmDurationRange.y));
+    }
+
+    // --- Métodos de "calm" solicitados por tu código previo o herramientas de debugging --- 
+    public void Calm() => CalmCat(3f);
+
+    public void CalmCat(float seconds)
+    {
+        if (calmCoroutine != null) StopCoroutine(calmCoroutine);
+        calmCoroutine = StartCoroutine(CalmRoutine(seconds));
+    }
+
+    private void CalmCatForSeconds(float seconds)
+    {
+        if (calmCoroutine != null) StopCoroutine(calmCoroutine);
+        calmCoroutine = StartCoroutine(CalmRoutine(seconds));
+    }
+
+    private IEnumerator CalmRoutine(float seconds)
+    {
+        IsCalm = true;
+        Debug.Log($"[CatAI] {name} calmado por {seconds:F1}s.");
+        yield return new WaitForSeconds(seconds);
+        IsCalm = false;
+        Debug.Log($"[CatAI] {name} ya no está calmado.");
     }
 }

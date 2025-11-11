@@ -17,14 +17,17 @@ public class DestroyObjectGoal : GOAPGoal
     {
         if (cat == null) return 0f;
 
-        // Detecta objetos cercanos según el mismo LayerMask
-        var objs = Physics.OverlapSphere(cat.transform.position, cat.detectionRadius, cat.interactableMask);
+        // usa las propiedades públicas
+        var objs = Physics.OverlapSphere(cat.transform.position, cat.DetectionRadius, cat.InteractableMask);
         return objs.Length > 0 ? 2f : 0.5f;
     }
 
     public override bool IsAchievable()
     {
-        var objs = Physics.OverlapSphere(transform.position, cat.detectionRadius, cat.interactableMask);
+        if (cat == null) return false;
+
+        // usa las propiedades públicas
+        var objs = Physics.OverlapSphere(transform.position, cat.DetectionRadius, cat.InteractableMask);
         return objs.Length > 0;
     }
 }

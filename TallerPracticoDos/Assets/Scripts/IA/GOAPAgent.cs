@@ -3,109 +3,114 @@ using UnityEngine;
 
 namespace GOAP
 {
-    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(Transform))]
     public class GOAPAgent : MonoBehaviour
     {
-        protected List<GOAPAction> availableActions = new();
-        protected Queue<GOAPAction> currentActions = new();
-        protected GOAPPlanner planner = new();
-        protected GOAPGoal currentGoal;
-        protected Animator animator;
-        public bool HasPlan => currentActions.Count > 0;
-        public IReadOnlyList<GOAPAction> AvailableActions => availableActions.AsReadOnly();
+        public List<GOAPAction> availableActions = new List<GOAPAction>();
+        private Queue<GOAPAction> currentActions;
+        private GOAPAction currentAction;
 
-        private float replanTimer;
-        private float replanInterval = 5f;
-        private float replanRandomness = 0.3f;
+        private GOAPPlanner planner = new GOAPPlanner();
 
-        protected virtual void Start()
+        private Dictionary<string, bool> worldState = new Dictionary<string, bool>();
+        private Dictionary<string, bool> goal = new Dictionary<string, bool>();
+
+        private void Awake()
         {
-            animator = GetComponent<Animator>();
-            availableActions.AddRange(GetComponents<GOAPAction>());
-            Debug.Log($"[GOAPAgent] {name} availableActions: {availableActions.Count}");
-            replanTimer = Random.Range(2f, 4f);
-        }
-
-        protected virtual void Update()
-        {
-            replanTimer -= Time.deltaTime;
-
-            if (currentActions.Count == 0 || replanTimer <= 0f)
-                Replan();
-
-            if (currentActions.Count > 0)
+            availableActions.Clear();
+            var acts = GetComponents<GOAPAction>();
+            foreach (var a in acts)
             {
-                var action = currentActions.Peek();
-
-                if (action.IsDone)
-                {
-                    currentActions.Dequeue();
-                    Debug.Log($"[GOAPAgent] {name} acción completada: {action.GetType().Name}");
-                    Replan();
-                    return;
-                }
-
-                bool success = action.Perform(gameObject);
-                if (!success)
-                {
-                    Debug.LogWarning($"[GOAPAgent] {name} acción falló ({action.GetType().Name}), replanificando...");
-                    currentActions.Clear();
-                    Replan();
-                }
+                if (a == null) continue;
+                availableActions.Add(a);
+                Debug.Log($"[GOAPAgent] {name} registró acción: {a.GetType().Name}");
             }
         }
 
-        /// <summary>
-        /// Establece una meta dinámica (sin usar new GOAPGoal, que no es válido en MonoBehaviours)
-        /// </summary>
-        public void SetGoal(string goalName, bool active)
+        private void Update()
         {
-            // Busca en este GameObject una GOAPGoal con ese nombre y úsala
-            var goals = GetComponents<GOAPGoal>();
-            var found = System.Array.Find(goals, g => g != null && g.GoalName == goalName);
-            if (found != null)
+            if (goal == null || goal.Count == 0)
+                return;
+
+            if (currentActions == null || (currentActions.Count == 0 && currentAction == null))
             {
-                currentGoal = found;
-                Debug.Log($"[GOAPAgent] {name} estableció meta dinámica '{goalName}'.");
                 Replan();
                 return;
             }
 
-            // Si no existe una GOAPGoal con ese nombre, no intentes crear un MonoBehaviour con new.
-            Debug.LogWarning($"[GOAPAgent] {name} no encontró una GOAPGoal llamada '{goalName}'. Asegúrate de que exista como componente.");
-        }
-
-        private void Replan()
-        {
-            replanTimer = replanInterval + Random.Range(-replanInterval * replanRandomness, replanInterval * replanRandomness);
-
-            if (currentGoal == null)
+            if (currentAction == null && currentActions.Count > 0)
             {
-                currentGoal = ChooseGoal();
-                if (currentGoal == null)
+                currentAction = currentActions.Dequeue();
+                currentAction.ResetAction();
+                Debug.Log($"[GOAPAgent] {name} ejecutando acción: {currentAction.GetType().Name}");
+
+                if (currentAction.RequiresInRange() && currentAction.Target == null)
                 {
-                    Debug.Log($"[GOAPAgent] {name} no tiene metas disponibles.");
-                    return;
+                    if (!currentAction.CheckProceduralPrecondition(gameObject))
+                    {
+                        currentAction = null;
+                        Replan();
+                        return;
+                    }
                 }
             }
 
-            var worldState = GetWorldState();
-            Debug.Log($"[GOAPAgent] {name} (re)planificando meta: {currentGoal.GoalName}");
+            if (currentAction == null) return;
 
-            var plan = planner.Plan(availableActions, worldState, currentGoal.DesiredState);
-            if (plan != null && plan.Count > 0)
+            bool result = currentAction.Perform(gameObject);
+
+            if (!result)
             {
-                currentActions = plan;
-                Debug.Log($"[GOAPAgent] {name} nuevo plan con {plan.Count} acciones ({currentGoal.GoalName}).");
+                currentAction = null;
+                Replan();
+                return;
             }
-            else
+
+            if (currentAction.IsDone)
             {
-                Debug.Log($"[GOAPAgent] {name} no pudo crear plan, intentará nuevamente pronto.");
-                currentActions.Clear();
+                currentAction.ResetAction();
+                currentAction = null;
+
+                if (currentActions != null && currentActions.Count > 0)
+                    currentAction = currentActions.Dequeue();
+                else
+                {
+                    Debug.Log($"[GOAPAgent] {name}: plan completado.");
+                    SetGoal("DestroyObject", false); // ?? desactiva meta tras completarla
+                }
             }
         }
 
-        protected virtual GOAPGoal ChooseGoal() => null;
-        protected virtual Dictionary<string, bool> GetWorldState() => new();
+        public void Replan()
+        {
+            currentActions = planner.Plan(
+                new List<GOAPAction>(availableActions),
+                new Dictionary<string, bool>(worldState),
+                new Dictionary<string, bool>(goal)
+            );
+
+            if (currentActions == null || currentActions.Count == 0)
+            {
+                currentAction = null;
+                return;
+            }
+
+            currentAction = currentActions.Dequeue();
+        }
+
+        public void SetGoal(string goalName, bool value)
+        {
+            if (goal.ContainsKey(goalName)) goal[goalName] = value;
+            else goal.Add(goalName, value);
+
+            Debug.Log($"[GOAPAgent] {name} SetGoal('{goalName}', {value})");
+            Replan();
+        }
+
+        public void SetWorldState(string key, bool value)
+        {
+            if (worldState.ContainsKey(key)) worldState[key] = value;
+            else worldState.Add(key, value);
+        }
     }
 }

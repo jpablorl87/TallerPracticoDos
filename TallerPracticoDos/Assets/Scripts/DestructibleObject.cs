@@ -2,58 +2,84 @@ using UnityEngine;
 
 public class DestructibleObject : MonoBehaviour
 {
-    [Header("Vida del objeto")]
-    [Tooltip("Cuánta vida tiene antes de ser destruido.")]
-    public float health = 3f;
+    [Header("Health / hits")]
+    [SerializeField] private int maxHits = 3;
+    private int currentHits = 0;
+    public bool IsDestroyed { get; private set; }
 
-    [Header("Feedback visual opcional")]
-    public ParticleSystem destructionEffect;
-    public float destroyDelay = 0f;
-    public AudioClip hitSound;
-    public AudioClip destroySound;
+    [Header("Effects")]
+    [SerializeField] private ParticleSystem hitEffect;      // humo, chispas (instanciado en cada hit)
+    [SerializeField] private ParticleSystem destroyEffect;  // efecto final (explosión)
 
-    private AudioSource audioSource;
-    private bool isDestroyed = false;
+    [Header("Optional")]
+    [SerializeField] private bool destroyGameObject = true; // si se destruye el GO
 
     private void Awake()
     {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-            audioSource = gameObject.AddComponent<AudioSource>();
+        IsDestroyed = false;
+        currentHits = 0;
+        Debug.Log($"[DestructibleObject] Awake: {name} maxHits={maxHits}");
     }
 
-    /// <summary>
-    /// Recibe daño del entorno o IA (por ejemplo, de CatAI).
-    /// </summary>
-    public void ApplyDamage(float damage)
+    // Llamada desde CatHitObjectAction: incremento por golpe.
+    public void TakeHit()
     {
-        if (isDestroyed) return;
+        if (IsDestroyed)
+        {
+            Debug.Log($"[DestructibleObject] TakeHit llamado en {name} pero ya está destruido.");
+            return;
+        }
 
-        health -= damage;
-        Debug.Log($"[DestructibleObject] {name} recibió {damage} de daño. Vida restante: {health}");
+        currentHits++;
+        Debug.Log($"[DestructibleObject] {name} recibió golpe ({currentHits}/{maxHits})");
 
-        if (hitSound != null && audioSource != null)
-            audioSource.PlayOneShot(hitSound);
+        if (hitEffect != null)
+        {
+            Instantiate(hitEffect, transform.position, Quaternion.identity);
+        }
 
-        if (health <= 0f)
+        if (currentHits >= maxHits)
+        {
             DestroyObject();
+        }
     }
 
-    /// <summary>
-    /// Maneja la destrucción del objeto (efecto + destrucción).
-    /// </summary>
+    // Compatibilidad si en algún otro lado se esperaba ApplyDamage(float)
+    public void ApplyDamage(float amount)
+    {
+        // cada unit => un golpe (mantener sencillo)
+        if (IsDestroyed)
+        {
+            Debug.Log($"[DestructibleObject] ApplyDamage llamado en {name} pero ya está destruido.");
+            return;
+        }
+
+        int hits = Mathf.Max(1, Mathf.RoundToInt(amount));
+        currentHits += hits;
+
+        Debug.Log($"[DestructibleObject] {name} ApplyDamage +{hits} => {currentHits}/{maxHits}");
+
+        if (hitEffect != null)
+            Instantiate(hitEffect, transform.position, Quaternion.identity);
+
+        if (currentHits >= maxHits)
+        {
+            DestroyObject();
+        }
+    }
+
     public void DestroyObject()
     {
-        if (isDestroyed) return;
-        isDestroyed = true;
+        if (IsDestroyed) return;
+        IsDestroyed = true;
 
-        if (destructionEffect != null)
-            Instantiate(destructionEffect, transform.position, Quaternion.identity);
+        if (destroyEffect != null)
+            Instantiate(destroyEffect, transform.position, Quaternion.identity);
 
-        if (destroySound != null && audioSource != null)
-            audioSource.PlayOneShot(destroySound);
+        Debug.Log($"[DestructibleObject] {name} destruido. (pos={transform.position})");
 
-        Debug.Log($"[DestructibleObject] {name} destruido.");
-        Destroy(gameObject, destroyDelay);
+        // Delay pequeño opcional para permitir que efecto se vea (si se desea)
+        if (destroyGameObject)
+            Destroy(gameObject);
     }
 }

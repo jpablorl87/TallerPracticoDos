@@ -119,6 +119,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   detectionRadius: 12
+  guaranteedAttackCooldown: 60
 --- !u!114 &4257923754671055101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,6 +203,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatHitObjectAction
   Cost: 1
+  attackRange: 1.6
+  attackCooldown: 1
+  lookBeforeAttack: 2
+  attackAngleTolerance: 45
+  hitsToDestroy: 2
+  detectionRadius: 6
+  targetMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!65 &7878581115831450524
 BoxCollider:
   m_ObjectHideFlags: 0

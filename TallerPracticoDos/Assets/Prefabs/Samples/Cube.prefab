@@ -142,8 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14e84deb3af4a3c47abdd45991a6aaae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DestructibleObject
-  health: 3
-  destructionEffect: {fileID: 0}
-  destroyDelay: 1
-  hitSound: {fileID: 0}
-  destroySound: {fileID: 0}
+  maxHits: 2
+  hitEffect: {fileID: 0}
+  destroyEffect: {fileID: 0}
+  destroyGameObject: 1

@@ -7,11 +7,15 @@ public class CatWalkAction : GOAPAction
     private NavMeshAgent navAgent;
     private Vector3 targetPos;
     private bool destinationSet;
-    private float wanderRadius = 8f;
     private float stuckTimer;
+
+    [SerializeField] private float wanderRadius = 8f;
+    [SerializeField] private LayerMask destructibleMask;
 
     private void Awake()
     {
+        // Esta acción prepara el terreno para atacar
+        AddEffect("HasTarget", true);
         AddEffect("isExploring", true);
         Cost = 0.5f;
     }
@@ -26,6 +30,20 @@ public class CatWalkAction : GOAPAction
     public override bool CheckProceduralPrecondition(GameObject agent)
     {
         navAgent ??= agent.GetComponent<NavMeshAgent>();
+
+        // Intentar moverse hacia un objeto destructible visible
+        var destructibles = GameObject.FindObjectsByType<DestructibleObject>(FindObjectsSortMode.None);
+        if (destructibles != null && destructibles.Length > 0)
+        {
+            var target = destructibles[Random.Range(0, destructibles.Length)];
+            if (target != null)
+            {
+                targetPos = target.transform.position;
+                return true;
+            }
+        }
+
+        // Si no hay objetos, deambula aleatoriamente
         targetPos = RandomNavSphere(agent.transform.position, wanderRadius);
         return true;
     }
@@ -36,19 +54,9 @@ public class CatWalkAction : GOAPAction
 
         if (!destinationSet)
         {
-            if (NavMesh.SamplePosition(RandomNavSphere(agent.transform.position, wanderRadius),
-                out var hit, wanderRadius, NavMesh.AllAreas))
-            {
-                targetPos = hit.position;
-                navAgent.SetDestination(targetPos);
-                destinationSet = true;
-                Debug.Log($"[CatWalkAction] {agent.name} camina hacia {targetPos}");
-            }
-            else
-            {
-                IsDone = true;
-                return false;
-            }
+            navAgent.SetDestination(targetPos);
+            destinationSet = true;
+            Debug.Log($"[CatWalkAction] {agent.name} camina hacia {targetPos}");
         }
 
         // Verificar si se atascó
