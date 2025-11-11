@@ -99,6 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9464a77c144c0ff4c97ee4003779cb59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GOAP.GOAPAgent
+  availableActions: []
 --- !u!114 &5825587158855115070
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,15 +112,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1701c1293973d4344ad48e8694aceeba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatAI
-  idleMin: 2
-  idleMax: 5
-  forcedActionInterval: 10
-  exploreRadius: 6
+  detectionRadius: 12
   interactableMask:
     serializedVersion: 2
     m_Bits: 64
-  detectionRadius: 12
-  guaranteedAttackCooldown: 60
+  maxIdleTime: 60
+  forcedAttackCooldown: 10
+  attackChance: 0.25
+  calmDurationRange: {x: 4, y: 8}
 --- !u!114 &4257923754671055101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,6 +190,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatWalkAction
   Cost: 1
+  wanderRadius: 8
+  destructibleMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &6603474247119124806
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,9 +213,6 @@ MonoBehaviour:
   attackAngleTolerance: 45
   hitsToDestroy: 2
   detectionRadius: 6
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!65 &7878581115831450524
 BoxCollider:
   m_ObjectHideFlags: 0
