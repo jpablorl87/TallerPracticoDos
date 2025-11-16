@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;  // Si necesitas TMP en algún subcomponente
 
 /// <summary>
 /// Clase base para enemigos del minijuego. Contiene lógica común.

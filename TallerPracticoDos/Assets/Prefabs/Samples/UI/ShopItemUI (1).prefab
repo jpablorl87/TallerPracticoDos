@@ -429,7 +429,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -33.77942, y: 1.0755615}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3941561290107241631
@@ -445,8 +445,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   itemName: SampleBall
-  price: 10
+  price: 1
   prefabToGive: {fileID: 6050886689511979959, guid: 2c0c2e186046616469f4d290ced62036, type: 3}
+  isDecoration: 0
   nameText: {fileID: 4631024216750016750}
   priceText: {fileID: 4036635703160462847}
   buyButton: {fileID: 362526130321629314}

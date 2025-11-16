@@ -26,9 +26,11 @@ public class CameraZoomController : MonoBehaviour
     [Header("Desplazamiento (Pan)")]
     [Tooltip("Velocidad de movimiento de la cámara al arrastrar.")]
     [SerializeField] private float panSpeed = 0.005f;
-    [Tooltip("Límites del área de movimiento de la cámara.")]
+    [Tooltip("Límite Mínimo del área de movimiento de la cámara (Ejes Locales X e Y).")]
     [SerializeField] private Vector2 panLimitMin = new Vector2(-10f, -10f);
+    [Tooltip("Límite Máximo del área de movimiento de la cámara (Ejes Locales X e Y).")]
     [SerializeField] private Vector2 panLimitMax = new Vector2(10f, 10f);
+    // ---------------------------------------------------
 
     [Header("Input Actions")]
     [SerializeField] private InputActionAsset inputActionsAsset;
@@ -37,7 +39,8 @@ public class CameraZoomController : MonoBehaviour
 
     // Referencias a componentes y datos de estado internos del script.
     private Camera mainCamera;
-    private Vector3 initialPosition; // Almacena la posición inicial de la cámara.
+    private Vector3 initialPosition;
+    private Vector3 initialLocalPosition; // Necesario para límites locales.
     private InputAction zoomMouseAction;
 
     // Acciones de entrada que controlan el arrastre. Se han separado para
@@ -62,8 +65,10 @@ public class CameraZoomController : MonoBehaviour
         mainCamera = GetComponent<Camera>();
         // Establece el tamaño de la cámara en su valor máximo al inicio.
         mainCamera.orthographicSize = maxZoom;
-        // Guarda la posición inicial para poder volver a ella.
+        // Guarda la posición inicial del Mundo.
         initialPosition = transform.position;
+        // Guarda la posición inicial LOCAL para los límites y el retorno.
+        initialLocalPosition = transform.localPosition;
 
         // Busca el mapa de acciones de entrada y asigna las acciones a las variables.
         var gameplayMap = inputActionsAsset.FindActionMap("Gameplay");
@@ -163,45 +168,60 @@ public class CameraZoomController : MonoBehaviour
     // Se activa cuando se presiona el botón o se toca la pantalla.
     private void OnDragStarted(InputAction.CallbackContext context)
     {
-        // Lee la posición inicial del cursor y activa el flag de arrastre.
         lastDragPosition = dragPositionAction.ReadValue<Vector2>();
         isDragging = true;
+
+        Debug.Log($"[CameraZoomController] Drag iniciado | Posición inicial: {lastDragPosition} | canPan={canPan}");
     }
 
     // Se activa cuando se suelta el botón o el dedo de la pantalla.
     private void OnDragCanceled(InputAction.CallbackContext context)
     {
-        // Desactiva el flag de arrastre.
         isDragging = false;
+        Debug.Log("[CameraZoomController] Drag finalizado.");
     }
 
     // Método que gestiona el movimiento de la cámara en cada frame.
     private void HandleDragPan()
     {
-        // Si no se puede hacer pan o no se está arrastrando, sale del método.
-        if (!canPan || !isDragging)
+        // Si no se permite el pan o no se está arrastrando, sale del método.
+        if (!canPan)
         {
+            Debug.Log("[CameraZoomController] Pan no permitido: zoom máximo o cámara reseteada.");
             return;
         }
 
-        // Lee la posición actual del cursor.
+        if (!isDragging)
+        {
+            // Para no saturar el log, avisamos solo una vez por segundo
+            return;
+        }
+
+        // 1. Lectura del input de arrastre
         Vector2 currentScreenPosition = dragPositionAction.ReadValue<Vector2>();
-        // Calcula el cambio de posición desde el último frame.
         Vector2 screenDelta = currentScreenPosition - lastDragPosition;
 
-        // Calcula el movimiento de la cámara en el espacio del mundo.
-        // Se usa `transform.right` y `transform.up` para movimientos relativos a la cámara,
-        // asegurando un pan intuitivo. El signo negativo invierte el movimiento.
+        Debug.Log($"[CameraZoomController] Drag activo | PosActual={currentScreenPosition} | Delta={screenDelta} | PanSpeed={panSpeed}");
+
+        // 2. Cálculo del movimiento.
         Vector3 panMovement = -transform.right * screenDelta.x * panSpeed + -transform.up * screenDelta.y * panSpeed;
 
-        // Aplica el movimiento y lo limita a los bordes del plano.
-        Vector3 newPosition = transform.position + panMovement;
-        newPosition.x = Mathf.Clamp(newPosition.x, panLimitMin.x, panLimitMax.x);
-        newPosition.z = Mathf.Clamp(newPosition.z, panLimitMin.y, panLimitMax.y);
+        // 3. Aplica el movimiento a la posición del MUNDO.
+        transform.position += panMovement;
 
-        transform.position = newPosition;
+        // 4. --- LÓGICA DE CLAMPING FIJO EN POSICIÓN LOCAL CON CORRECCIÓN DE ZOOM ---
+        Vector3 localPosition = transform.localPosition;
 
-        // Actualiza la posición del último arrastre para el próximo cálculo.
+        float halfHeight = mainCamera.orthographicSize;
+        float halfWidth = halfHeight * mainCamera.aspect;
+
+        localPosition.x = Mathf.Clamp(localPosition.x, panLimitMin.x + halfWidth, panLimitMax.x - halfWidth);
+        localPosition.y = Mathf.Clamp(localPosition.y, panLimitMin.y + halfHeight, panLimitMax.y - halfHeight);
+        localPosition.z = initialLocalPosition.z;
+
+        transform.localPosition = localPosition;
+
+        // 6. Actualizar la posición para el siguiente frame
         lastDragPosition = currentScreenPosition;
     }
 
@@ -219,8 +239,10 @@ public class CameraZoomController : MonoBehaviour
         {
             // Calcula un factor de interpolación para un movimiento suave.
             float t = Mathf.InverseLerp(mainCamera.orthographicSize, maxZoom, newSize);
-            // Mueve la cámara suavemente de regreso a su posición inicial.
-            transform.position = Vector3.Lerp(transform.position, initialPosition, t);
+
+            // CAMBIO: Usamos la posición LOCAL (initialLocalPosition) para el retorno.
+            transform.localPosition = Vector3.Lerp(transform.localPosition, initialLocalPosition, t);
+
             mainCamera.orthographicSize = maxZoom;
             canPan = false;
         }

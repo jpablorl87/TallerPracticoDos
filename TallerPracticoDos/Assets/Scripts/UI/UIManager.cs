@@ -13,6 +13,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject shopPanel;
     [SerializeField] private GameObject minigamesPanel;
 
+    [Header("MiniOptions Buttons (assign in inspector)")]
+    [SerializeField] private Button moveButton;
+    [SerializeField] private Button deleteButton;
+
     [Header("Decoración UI")]
     [Tooltip("Prefab de botón (UI) para una decoración, con Button + TMP_Text")]
     [SerializeField] private GameObject decorationItemTemplate;
@@ -26,8 +30,20 @@ public class UIManager : MonoBehaviour
     {
         // Obtiene la referencia si no fue asignada desde el Inspector
         if (interactionController == null)
+            interactionController = FindFirstObjectByType<InteractionController>();
+
+        // Ensure buttons are not wiredup multiple times
+        if (moveButton != null) moveButton.onClick.RemoveAllListeners();
+        if (deleteButton != null) deleteButton.onClick.RemoveAllListeners();
+    }
+
+    private void Start()
+    {
+        // Wire to interaction controller (safe: single place)
+        if (interactionController != null)
         {
-            interactionController = FindObjectOfType<InteractionController>();
+            if (moveButton != null) moveButton.onClick.AddListener(interactionController.OnMoveOptionSelected);
+            if (deleteButton != null) deleteButton.onClick.AddListener(interactionController.OnDeleteOptionSelected);
         }
     }
 
@@ -62,6 +78,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowMiniOptions()
     {
+        // Cierra otros paneles y abre solo miniOptions
         HideAllPanels();
         miniOptionsPanel?.SetActive(true);
     }
