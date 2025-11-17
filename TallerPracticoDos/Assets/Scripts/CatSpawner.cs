@@ -29,7 +29,7 @@ public class CatSpawner : MonoBehaviour
 
         if (!gameObject.activeInHierarchy)
         {
-            Debug.LogWarning("[CatSpawner] Estaba desactivado, activando...");
+           // Debug.LogWarning("[CatSpawner] Estaba desactivado, activando...");
             gameObject.SetActive(true);
         }
 
@@ -39,18 +39,18 @@ public class CatSpawner : MonoBehaviour
             bool hasNavMesh = UnityEngine.AI.NavMesh.SamplePosition(spawnCenter.position, out var _, 2f, UnityEngine.AI.NavMesh.AllAreas);
             if (!hasNavMesh)
             {
-                Debug.LogWarning("[CatSpawner] No hay NavMesh detectado, reconstruyendo...");
+                //Debug.LogWarning("[CatSpawner] No hay NavMesh detectado, reconstruyendo...");
                 surface.BuildNavMesh();
             }
         }
         else
         {
-            Debug.LogError("[CatSpawner] No se encontró NavMeshSurface en la escena. Los gatos no podrán moverse.");
+            //Debug.LogError("[CatSpawner] No se encontró NavMeshSurface en la escena. Los gatos no podrán moverse.");
         }
 
         if (catPrefabs == null || catPrefabs.Count == 0)
         {
-            Debug.LogError("[CatSpawner] catPrefabs vacío o nulo. Verifica en el Inspector que el prefab del gato esté asignado.");
+            //Debug.LogError("[CatSpawner] catPrefabs vacío o nulo. Verifica en el Inspector que el prefab del gato esté asignado.");
         }
     }
 
@@ -80,17 +80,17 @@ public class CatSpawner : MonoBehaviour
 
     private void TrySpawnCat()
     {
-        Debug.Log("[CatSpawner] Intentando spawnear gato...");
+        //Debug.Log("[CatSpawner] Intentando spawnear gato...");
 
         if (activeCats.Count >= maxCats)
         {
-            Debug.Log("[CatSpawner] Límite máximo de gatos alcanzado.");
+          //  Debug.Log("[CatSpawner] Límite máximo de gatos alcanzado.");
             return;
         }
 
         if (catPrefabs == null || catPrefabs.Count == 0)
         {
-            Debug.LogError("[CatSpawner] catPrefabs vacío o nulo. Verifica referencias en el Inspector.");
+            //Debug.LogError("[CatSpawner] catPrefabs vacío o nulo. Verifica referencias en el Inspector.");
             return;
         }
 
@@ -100,42 +100,42 @@ public class CatSpawner : MonoBehaviour
         if (NavMesh.SamplePosition(randomPos, out var hit, 4f, NavMesh.AllAreas))
         {
             GameObject prefab = catPrefabs[Random.Range(0, catPrefabs.Count)];
-            Debug.Log($"[CatSpawner] Prefab seleccionado: {prefab?.name ?? "NULL"}");
+            //Debug.Log($"[CatSpawner] Prefab seleccionado: {prefab?.name ?? "NULL"}");
 
             GameObject cat = Instantiate(prefab, hit.position, Quaternion.identity);
             cat.transform.position += Vector3.up * 0.1f; // evita quedar bajo el plano
             activeCats.Add(cat);
 
-            Debug.Log($"[CatSpawner] Gato creado en {hit.position}");
+            //Debug.Log($"[CatSpawner] Gato creado en {hit.position}");
         }
         else
         {
-            Debug.LogWarning($"[CatSpawner] No se encontró posición válida cerca de {randomPos}");
+            //Debug.LogWarning($"[CatSpawner] No se encontró posición válida cerca de {randomPos}");
         }
     }
 
 
     public void ActivateSpawner()
     {
-        Debug.Log("[CatSpawner] Activado por primer objeto colocado.");
+        //Debug.Log("[CatSpawner] Activado por primer objeto colocado.");
 
         // Verificar si existe algún NavMeshSurface activo
         var surface = FindFirstObjectByType<Unity.AI.Navigation.NavMeshSurface>();
         if (surface == null)
         {
-            Debug.LogError("[CatSpawner] No se encontró NavMeshSurface en la escena. Los gatos no podrán moverse.");
+            //Debug.LogError("[CatSpawner] No se encontró NavMeshSurface en la escena. Los gatos no podrán moverse.");
         }
         else
         {
             // Intentar samplear posición para verificar si hay NavMesh
             if (!NavMesh.SamplePosition(spawnCenter.position, out var _, 2f, NavMesh.AllAreas))
             {
-                Debug.LogWarning("[CatSpawner] No se detecta NavMesh válido, reconstruyendo...");
+                //Debug.LogWarning("[CatSpawner] No se detecta NavMesh válido, reconstruyendo...");
                 surface.BuildNavMesh();
             }
             else
             {
-                Debug.Log("[CatSpawner] NavMesh válido detectado.");
+                //Debug.Log("[CatSpawner] NavMesh válido detectado.");
             }
         }
 
