@@ -20,14 +20,14 @@ public class CurrencyManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.Log("Destroying duplicate CurrencyManager");
+            //Debug.Log("Destroying duplicate CurrencyManager");
             Destroy(gameObject);
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log("CurrencyManager Awake - Instance set");
+        //Debug.Log("CurrencyManager Awake - Instance set");
 
 #if UNITY_EDITOR
         PlayerPrefs.DeleteKey(CoinsKey); // Solo en editor si quieres pruebas limpias (opcional)
@@ -71,7 +71,7 @@ public class CurrencyManager : MonoBehaviour
     {
         if (amount <= 0) return;
 
-        Debug.Log($"AddCoins called with amount: {amount}");
+        //Debug.Log($"AddCoins called with amount: {amount}");
         Coins += amount;
         SaveCoins();
         OnCoinsChanged?.Invoke();
@@ -109,12 +109,12 @@ public class CurrencyManager : MonoBehaviour
         if (pm != null)
         {
             pm.RegisterGameSession(lastSessionCoins); // registra la sesión (normalización interna)
-            Debug.Log($"[CurrencyManager] Notified PlayerMetrics of coins: {lastSessionCoins}");
+            //Debug.Log($"[CurrencyManager] Notified PlayerMetrics of coins: {lastSessionCoins}");
             lastSessionCoins = 0f; // ya notificado
         }
         else
         {
-            Debug.Log("[CurrencyManager] PlayerMetrics no encontrado en la escena actual. Se reintentará en la carga de la siguiente escena.");
+            //Debug.Log("[CurrencyManager] PlayerMetrics no encontrado en la escena actual. Se reintentará en la carga de la siguiente escena.");
         }
     }
 }
