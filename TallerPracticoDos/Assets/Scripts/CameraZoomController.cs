@@ -171,14 +171,14 @@ public class CameraZoomController : MonoBehaviour
         lastDragPosition = dragPositionAction.ReadValue<Vector2>();
         isDragging = true;
 
-        Debug.Log($"[CameraZoomController] Drag iniciado | Posición inicial: {lastDragPosition} | canPan={canPan}");
+        //Debug.Log($"[CameraZoomController] Drag iniciado | Posición inicial: {lastDragPosition} | canPan={canPan}");
     }
 
     // Se activa cuando se suelta el botón o el dedo de la pantalla.
     private void OnDragCanceled(InputAction.CallbackContext context)
     {
         isDragging = false;
-        Debug.Log("[CameraZoomController] Drag finalizado.");
+        //Debug.Log("[CameraZoomController] Drag finalizado.");
     }
 
     // Método que gestiona el movimiento de la cámara en cada frame.
@@ -187,7 +187,7 @@ public class CameraZoomController : MonoBehaviour
         // Si no se permite el pan o no se está arrastrando, sale del método.
         if (!canPan)
         {
-            Debug.Log("[CameraZoomController] Pan no permitido: zoom máximo o cámara reseteada.");
+            //Debug.Log("[CameraZoomController] Pan no permitido: zoom máximo o cámara reseteada.");
             return;
         }
 
@@ -201,7 +201,7 @@ public class CameraZoomController : MonoBehaviour
         Vector2 currentScreenPosition = dragPositionAction.ReadValue<Vector2>();
         Vector2 screenDelta = currentScreenPosition - lastDragPosition;
 
-        Debug.Log($"[CameraZoomController] Drag activo | PosActual={currentScreenPosition} | Delta={screenDelta} | PanSpeed={panSpeed}");
+        //Debug.Log($"[CameraZoomController] Drag activo | PosActual={currentScreenPosition} | Delta={screenDelta} | PanSpeed={panSpeed}");
 
         // 2. Cálculo del movimiento.
         Vector3 panMovement = -transform.right * screenDelta.x * panSpeed + -transform.up * screenDelta.y * panSpeed;
