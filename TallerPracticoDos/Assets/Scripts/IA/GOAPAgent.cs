@@ -23,7 +23,7 @@ namespace GOAP
             {
                 if (a == null) continue;
                 availableActions.Add(a);
-                Debug.Log($"[GOAPAgent] {name} registró acción: {a.GetType().Name}");
+                //Debug.Log($"[GOAPAgent] {name} registró acción: {a.GetType().Name}");
             }
         }
 
@@ -42,7 +42,7 @@ namespace GOAP
             {
                 currentAction = currentActions.Dequeue();
                 currentAction.ResetAction();
-                Debug.Log($"[GOAPAgent] {name} ejecutando acción: {currentAction.GetType().Name}");
+                //Debug.Log($"[GOAPAgent] {name} ejecutando acción: {currentAction.GetType().Name}");
 
                 if (currentAction.RequiresInRange() && currentAction.Target == null)
                 {
@@ -75,7 +75,7 @@ namespace GOAP
                     currentAction = currentActions.Dequeue();
                 else
                 {
-                    Debug.Log($"[GOAPAgent] {name}: plan completado.");
+                   // Debug.Log($"[GOAPAgent] {name}: plan completado.");
                     SetGoal("DestroyObject", false); // ?? desactiva meta tras completarla
                 }
             }
@@ -103,7 +103,7 @@ namespace GOAP
             if (goal.ContainsKey(goalName)) goal[goalName] = value;
             else goal.Add(goalName, value);
 
-            Debug.Log($"[GOAPAgent] {name} SetGoal('{goalName}', {value})");
+            //Debug.Log($"[GOAPAgent] {name} SetGoal('{goalName}', {value})");
             Replan();
         }
 
