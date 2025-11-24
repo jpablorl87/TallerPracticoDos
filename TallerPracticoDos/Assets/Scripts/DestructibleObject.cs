@@ -18,7 +18,7 @@ public class DestructibleObject : MonoBehaviour
     {
         IsDestroyed = false;
         currentHits = 0;
-        Debug.Log($"[DestructibleObject] Awake: {name} maxHits={maxHits}");
+        //Debug.Log($"[DestructibleObject] Awake: {name} maxHits={maxHits}");
     }
 
     // Llamada desde CatHitObjectAction: incremento por golpe.
@@ -26,12 +26,12 @@ public class DestructibleObject : MonoBehaviour
     {
         if (IsDestroyed)
         {
-            Debug.Log($"[DestructibleObject] TakeHit llamado en {name} pero ya está destruido.");
+            //Debug.Log($"[DestructibleObject] TakeHit llamado en {name} pero ya está destruido.");
             return;
         }
 
         currentHits++;
-        Debug.Log($"[DestructibleObject] {name} recibió golpe ({currentHits}/{maxHits})");
+        //Debug.Log($"[DestructibleObject] {name} recibió golpe ({currentHits}/{maxHits})");
 
         if (hitEffect != null)
         {
@@ -50,14 +50,14 @@ public class DestructibleObject : MonoBehaviour
         // cada unit => un golpe (mantener sencillo)
         if (IsDestroyed)
         {
-            Debug.Log($"[DestructibleObject] ApplyDamage llamado en {name} pero ya está destruido.");
+            //Debug.Log($"[DestructibleObject] ApplyDamage llamado en {name} pero ya está destruido.");
             return;
         }
 
         int hits = Mathf.Max(1, Mathf.RoundToInt(amount));
         currentHits += hits;
 
-        Debug.Log($"[DestructibleObject] {name} ApplyDamage +{hits} => {currentHits}/{maxHits}");
+        //Debug.Log($"[DestructibleObject] {name} ApplyDamage +{hits} => {currentHits}/{maxHits}");
 
         if (hitEffect != null)
             Instantiate(hitEffect, transform.position, Quaternion.identity);
@@ -76,7 +76,7 @@ public class DestructibleObject : MonoBehaviour
         if (destroyEffect != null)
             Instantiate(destroyEffect, transform.position, Quaternion.identity);
 
-        Debug.Log($"[DestructibleObject] {name} destruido. (pos={transform.position})");
+        //Debug.Log($"[DestructibleObject] {name} destruido. (pos={transform.position})");
 
         // Delay pequeño opcional para permitir que efecto se vea (si se desea)
         if (destroyGameObject)
