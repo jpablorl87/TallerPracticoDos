@@ -56,7 +56,7 @@ public class CatWalkAction : GOAPAction
         {
             navAgent.SetDestination(targetPos);
             destinationSet = true;
-            Debug.Log($"[CatWalkAction] {agent.name} camina hacia {targetPos}");
+            //Debug.Log($"[CatWalkAction] {agent.name} camina hacia {targetPos}");
         }
 
         // Verificar si se atascó
@@ -65,7 +65,7 @@ public class CatWalkAction : GOAPAction
             stuckTimer += Time.deltaTime;
             if (stuckTimer > 3f)
             {
-                Debug.LogWarning($"[CatWalkAction] {agent.name} atascado, abortando camino.");
+                //Debug.LogWarning($"[CatWalkAction] {agent.name} atascado, abortando camino.");
                 IsDone = true;
                 return false;
             }
@@ -75,7 +75,7 @@ public class CatWalkAction : GOAPAction
         if (!navAgent.pathPending && navAgent.remainingDistance <= navAgent.stoppingDistance)
         {
             IsDone = true;
-            Debug.Log($"[CatWalkAction] {agent.name} llegó a destino.");
+            //Debug.Log($"[CatWalkAction] {agent.name} llegó a destino.");
         }
 
         return true;
