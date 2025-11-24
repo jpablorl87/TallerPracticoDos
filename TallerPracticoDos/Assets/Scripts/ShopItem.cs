@@ -51,7 +51,7 @@ public class ShopItem : MonoBehaviour
         }
         else
         {
-            Debug.Log("No tienes suficientes monedas para comprar " + itemName);
+            //Debug.Log("No tienes suficientes monedas para comprar " + itemName);
         }
     }
 }
