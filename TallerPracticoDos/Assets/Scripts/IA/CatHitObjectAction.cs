@@ -61,7 +61,7 @@ public class CatHitObjectAction : GOAPAction
         if (best == null) return false;
         target = best;
         Target = target.gameObject;
-        Debug.Log($"[CatHitObjectAction] {actor.name} asignó objetivo: {target.name} (dist={bestDist:F2})");
+        //Debug.Log($"[CatHitObjectAction] {actor.name} asignó objetivo: {target.name} (dist={bestDist:F2})");
         return true;
     }
 
@@ -113,11 +113,11 @@ public class CatHitObjectAction : GOAPAction
             animator?.SetTrigger("Attack");
             target.TakeHit();
 
-            Debug.Log($"[CatHitObjectAction] {actor.name} golpeó {target.name} (hit {localHits})");
+            //Debug.Log($"[CatHitObjectAction] {actor.name} golpeó {target.name} (hit {localHits})");
 
             if (target.IsDestroyed)
             {
-                Debug.Log($"[CatHitObjectAction] {actor.name} destruyó {target.name}");
+                //Debug.Log($"[CatHitObjectAction] {actor.name} destruyó {target.name}");
                 IsDone = true;
 
                 var catAI = actor.GetComponent<CatAI>();
