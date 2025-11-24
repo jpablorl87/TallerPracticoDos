@@ -41,7 +41,7 @@ public class CatHitObjectAction : GOAPAction
 
     public override bool CheckProceduralPrecondition(GameObject actor)
     {
-        var all = Object.FindObjectsOfType<DestructibleObject>();
+        var all = FindObjectsByType<DestructibleObject>(FindObjectsSortMode.None);
         if (all == null || all.Length == 0) return false;
 
         float bestDist = Mathf.Infinity;
