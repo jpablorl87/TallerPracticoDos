@@ -40,12 +40,12 @@ public class CatAI : MonoBehaviour
     {
         if (agent == null)
         {
-            Debug.LogError($"[CatAI] {name} no tiene GOAPAgent.");
+            //Debug.LogError($"[CatAI] {name} no tiene GOAPAgent.");
             enabled = false;
             return;
         }
 
-        Debug.Log($"[CatAI] {name} iniciado. detectionRadius={detectionRadius}");
+        //Debug.Log($"[CatAI] {name} iniciado. detectionRadius={detectionRadius}");
         StartCoroutine(BehaviourLoop());
     }
 
@@ -61,34 +61,34 @@ public class CatAI : MonoBehaviour
             {
                 string names = "";
                 foreach (var c in found) names += c.gameObject.name + ", ";
-                Debug.Log($"[CatAI] Detectados {found.Length} interactables cerca de {name}: {names}");
+                //Debug.Log($"[CatAI] Detectados {found.Length} interactables cerca de {name}: {names}");
             }
             else
             {
-                Debug.Log($"[CatAI] No se detectaron interactables cerca de {name} (radius={detectionRadius}).");
+               //Debug.Log($"[CatAI] No se detectaron interactables cerca de {name} (radius={detectionRadius}).");
             }
 
             // Intento de actualizar world state en el GOAPAgent
             if (agent != null)
             {
                 agent.SetWorldState("HasTarget", hasTarget);
-                Debug.Log($"[CatAI] Llamó agent.SetWorldState('HasTarget', {hasTarget})");
+               // Debug.Log($"[CatAI] Llamó agent.SetWorldState('HasTarget', {hasTarget})");
             }
             else
             {
-                Debug.LogWarning($"[CatAI] agent es NULL en {name} cuando intenta SetWorldState.");
+                //Debug.LogWarning($"[CatAI] agent es NULL en {name} cuando intenta SetWorldState.");
             }
 
             // Si hay objetivo cercano y no estamos calmados, solicitar ataque
             if (hasTarget && !IsCalm)
             {
-                Debug.Log($"[CatAI] hasTarget && !IsCalm -> llamando TryImmediateAttack en {name}.");
+                //Debug.Log($"[CatAI] hasTarget && !IsCalm -> llamando TryImmediateAttack en {name}.");
                 TryImmediateAttack();
             }
 
             // Idle aleatorio
             float idleDuration = Random.Range(2f, 5f);
-            Debug.Log($"[CatAI] {name} idle {idleDuration:F1}s.");
+            //Debug.Log($"[CatAI] {name} idle {idleDuration:F1}s.");
             float timer = 0f;
             while (timer < idleDuration)
             {
@@ -99,7 +99,7 @@ public class CatAI : MonoBehaviour
                 // Forzar ataque si lleva mucho tiempo sin atacar y no está calm
                 if (!IsCalm && idleTimer > maxIdleTime && Time.time - lastForcedAttackTime > forcedAttackCooldown)
                 {
-                    Debug.Log($"[CatAI] {name} lleva >{maxIdleTime}s sin atacar, forzando intento.");
+                    //Debug.Log($"[CatAI] {name} lleva >{maxIdleTime}s sin atacar, forzando intento.");
                     lastForcedAttackTime = Time.time;
                     TryImmediateAttack(force: true);
                     idleTimer = 0f;
@@ -128,14 +128,14 @@ public class CatAI : MonoBehaviour
             if (navMeshAgent != null && navMeshAgent.isOnNavMesh)
             {
                 navMeshAgent.SetDestination(hit.position);
-                Debug.Log($"[CatAI] {name} caminando a {hit.position}.");
+                //Debug.Log($"[CatAI] {name} caminando a {hit.position}.");
 
                 while (navMeshAgent.pathPending || navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance)
                     yield return null;
             }
             else
             {
-                Debug.LogWarning($"[CatAI] navMeshAgent no disponible o no onNavMesh en {name}.");
+                //Debug.LogWarning($"[CatAI] navMeshAgent no disponible o no onNavMesh en {name}.");
             }
         }
 
@@ -150,13 +150,13 @@ public class CatAI : MonoBehaviour
     {
         if (IsCalm && !force)
         {
-            Debug.Log($"[CatAI] {name} está calmado; no forzar ataque.");
+            //Debug.Log($"[CatAI] {name} está calmado; no forzar ataque.");
             return;
         }
 
         if (agent == null)
         {
-            Debug.LogError($"[CatAI] agent es NULL en TryImmediateAttack() de {name}.");
+            //Debug.LogError($"[CatAI] agent es NULL en TryImmediateAttack() de {name}.");
             return;
         }
 
@@ -164,24 +164,24 @@ public class CatAI : MonoBehaviour
         try
         {
             var actions = agent.availableActions;
-            Debug.Log($"[CatAI] GOAPAgent tiene {actions?.Count ?? 0} acciones registradas.");
+            //Debug.Log($"[CatAI] GOAPAgent tiene {actions?.Count ?? 0} acciones registradas.");
             if (actions != null)
             {
                 foreach (var a in actions)
                 {
-                    Debug.Log($"[CatAI] - acción registrada: {(a != null ? a.GetType().Name : "NULL")}");
+                   // Debug.Log($"[CatAI] - acción registrada: {(a != null ? a.GetType().Name : "NULL")}");
                 }
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogWarning($"[CatAI] No se pudo leer availableActions del GOAPAgent: {ex.Message}");
+            //Debug.LogWarning($"[CatAI] No se pudo leer availableActions del GOAPAgent: {ex.Message}");
         }
 
         // Probabilidad de atacar (comportamiento impredecible)
         if (!force && Random.value > attackChance)
         {
-            Debug.Log($"[CatAI] {name} decidió no atacar esta vez (probabilidad).");
+            //Debug.Log($"[CatAI] {name} decidió no atacar esta vez (probabilidad).");
             return;
         }
 
@@ -189,7 +189,7 @@ public class CatAI : MonoBehaviour
         agent.SetWorldState("HasTarget", true);
         agent.SetGoal("DestroyObject", true);
 
-        Debug.Log($"[CatAI] {name} solicitó meta 'DestroyObject' (force={force}).");
+        //Debug.Log($"[CatAI] {name} solicitó meta 'DestroyObject' (force={force}).");
 
         // aplicamos una calma corta después de solicitar la meta para evitar replanificaciones spam
         CalmCatForSeconds(Random.Range(calmDurationRange.x, calmDurationRange.y));
@@ -213,9 +213,9 @@ public class CatAI : MonoBehaviour
     private IEnumerator CalmRoutine(float seconds)
     {
         IsCalm = true;
-        Debug.Log($"[CatAI] {name} calmado por {seconds:F1}s.");
+        //Debug.Log($"[CatAI] {name} calmado por {seconds:F1}s.");
         yield return new WaitForSeconds(seconds);
         IsCalm = false;
-        Debug.Log($"[CatAI] {name} ya no está calmado.");
+       // Debug.Log($"[CatAI] {name} ya no está calmado.");
     }
 }
