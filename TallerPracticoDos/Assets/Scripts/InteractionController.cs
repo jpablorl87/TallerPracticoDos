@@ -55,31 +55,31 @@ public class InteractionController : MonoBehaviour
             Ray ray = mainCamera.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
             if (Physics.Raycast(ray, out var hit, 100f))
             {
-                Debug.Log($"[TEST] Spacebar ray hit {hit.collider.name} at {hit.point}");
-                Debug.DrawLine(ray.origin, hit.point, Color.green, 2f);
+                //Debug.Log($"[TEST] Spacebar ray hit {hit.collider.name} at {hit.point}");
+                //Debug.DrawLine(ray.origin, hit.point, Color.green, 2f);
             }
             else
             {
-                Debug.LogWarning("[TEST] Spacebar ray hit nothing!");
+                //Debug.LogWarning("[TEST] Spacebar ray hit nothing!");
             }
         }
     }
     private void OnTap(InputAction.CallbackContext ctx)
     {
         Vector2 screenPos = GetCurrentPointerPosition();
-        Debug.Log($"[InteractionController] OnTap - screenPos: {screenPos} (touch? {Touchscreen.current != null})");
+        //Debug.Log($"[InteractionController] OnTap - screenPos: {screenPos} (touch? {Touchscreen.current != null})");
 
         if (IsPointerOverUI(screenPos))
         {
-            Debug.Log("[InteractionController] Tap sobre UI - ignorando.");
+            //Debug.Log("[InteractionController] Tap sobre UI - ignorando.");
             return;
         }
 
         Ray ray = mainCamera.ScreenPointToRay(screenPos);
-        Debug.Log($"[InteractionController] Ray origin: {ray.origin}, dir: {ray.direction}");
+        //Debug.Log($"[InteractionController] Ray origin: {ray.origin}, dir: {ray.direction}");
 
         // Dibuja el rayo en la escena durante 3 segundos
-        Debug.DrawRay(ray.origin, ray.direction * 20f, Color.red, 3f);
+        //Debug.DrawRay(ray.origin, ray.direction * 20f, Color.red, 3f);
 
         // --- Chequeo de raycast ---
         RaycastHit hit;
@@ -87,11 +87,11 @@ public class InteractionController : MonoBehaviour
 
         if (rayHit)
         {
-            Debug.Log($"[InteractionController] Raycast golpeó: {hit.collider.name} en capa {LayerMask.LayerToName(hit.collider.gameObject.layer)} | Punto: {hit.point}");
+            //Debug.Log($"[InteractionController] Raycast golpeó: {hit.collider.name} en capa {LayerMask.LayerToName(hit.collider.gameObject.layer)} | Punto: {hit.point}");
         }
         else
         {
-            Debug.LogWarning("[InteractionController] Raycast no golpeó nada. Verifica colliders y capas físicas.");
+           // Debug.LogWarning("[InteractionController] Raycast no golpeó nada. Verifica colliders y capas físicas.");
             return;
         }
 
@@ -101,7 +101,7 @@ public class InteractionController : MonoBehaviour
         {
             float calmFor = Random.Range(20f, 60f);
             cat.CalmCat(calmFor);
-            Debug.Log("[InteractionController] Gato calmado por clic/tap.");
+           // Debug.Log("[InteractionController] Gato calmado por clic/tap.");
             return;
         }
 
@@ -148,7 +148,7 @@ public class InteractionController : MonoBehaviour
             placedObject = obj;
             waitingToPlaceBase = false;
             selectedBasePrefab = null;
-            Debug.Log("[Placement] Objeto colocado: " + obj.name);
+           // Debug.Log("[Placement] Objeto colocado: " + obj.name);
             return;
         }
 
@@ -169,11 +169,11 @@ public class InteractionController : MonoBehaviour
                 pendingDecorationPrefab = null;
                 uiManager.HideAllPanels();
 
-                Debug.Log("[Decorate] Decoración aplicada en " + soHit.name);
+                //Debug.Log("[Decorate] Decoración aplicada en " + soHit.name);
                 return;
             }
 
-            Debug.LogWarning("[Decorate] No se pudo decorar, superficie no válida.");
+            //Debug.LogWarning("[Decorate] No se pudo decorar, superficie no válida.");
             waitingToDecorate = false;
             pendingDecorationPrefab = null;
             uiManager.HideAllPanels();
@@ -186,7 +186,7 @@ public class InteractionController : MonoBehaviour
         {
             placedObject = soSelected.gameObject;
             uiManager.ShowMiniOptions();
-            Debug.Log("[Tap] Objeto seleccionado: " + placedObject.name);
+           // Debug.Log("[Tap] Objeto seleccionado: " + placedObject.name);
             return;
         }
 
@@ -195,7 +195,7 @@ public class InteractionController : MonoBehaviour
         {
             placedObject = null;
             uiManager.HideAllPanels();
-            Debug.Log("[Tap] Clic fuera (deselección).");
+            //Debug.Log("[Tap] Clic fuera (deselección).");
         }
     }
 
@@ -248,7 +248,7 @@ public class InteractionController : MonoBehaviour
         // Verificar que haya un objeto seleccionado
         if (placedObject == null)
         {
-            Debug.LogWarning("[Move] No hay objeto seleccionado para mover.");
+           // Debug.LogWarning("[Move] No hay objeto seleccionado para mover.");
             return;
         }
 
@@ -256,15 +256,15 @@ public class InteractionController : MonoBehaviour
         SelectableObject so = placedObject.GetComponentInParent<SelectableObject>();
         if (so == null)
         {
-            Debug.LogWarning("[Move] El objeto seleccionado no tiene SelectableObject.");
+           // Debug.LogWarning("[Move] El objeto seleccionado no tiene SelectableObject.");
             return;
         }
 
         GameObject root = so.gameObject;
 
         // Log para depurar qué objeto realmente va a moverse
-        Debug.Log("[Move] Solicitado mover objeto: " + root.name +
-                  " (desde placedObject = " + placedObject.name + ")");
+        //Debug.Log("[Move] Solicitado mover objeto: " + root.name +
+                 // " (desde placedObject = " + placedObject.name + ")");
 
         // Cerrar el minioptions menu automáticamente
         uiManager.HideAllPanels();
@@ -287,8 +287,8 @@ public class InteractionController : MonoBehaviour
         isMovingObject = true;
 
         // Log adicional para confirmar activación
-        Debug.Log("[Move] Modo mover ACTIVADO. Ghost creado: " +
-                  ghostObject.name + " | Original desactivado: " + placedObject.name);
+        //Debug.Log("[Move] Modo mover ACTIVADO. Ghost creado: " +
+                 // ghostObject.name + " | Original desactivado: " + placedObject.name);
     }
 
     public void OnDeleteOptionSelected()
@@ -317,7 +317,7 @@ public class InteractionController : MonoBehaviour
         pendingDecorationPrefab = null;
         ghostObject = null;
 
-        Debug.Log("[Delete] objeto eliminado y estado limpiado.");
+        //Debug.Log("[Delete] objeto eliminado y estado limpiado.");
     }
 
     public void OnDecorationItemSelected(int decorIndex)
@@ -343,7 +343,7 @@ public class InteractionController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Decoración no permitida para este objeto.");
+            //Debug.LogWarning("Decoración no permitida para este objeto.");
         }
         uiManager.HideAllPanels();
     }
@@ -412,7 +412,7 @@ public class InteractionController : MonoBehaviour
 
         if (so == null || placedCollider == null)
         {
-            Debug.LogWarning("ApplyPlacement: SelectableObject o Collider no encontrado en el objeto.");
+           // Debug.LogWarning("ApplyPlacement: SelectableObject o Collider no encontrado en el objeto.");
             return;
         }
 
@@ -456,7 +456,7 @@ public class InteractionController : MonoBehaviour
             if (h.CompareTag("Floor") || h.CompareTag("Wall")) continue;
             if (h.GetComponentInParent<SelectableObject>() != null)
             {
-                Debug.Log("[ApplyPlacement] Colisión detectada. Cancelando colocación.");
+                //Debug.Log("[ApplyPlacement] Colisión detectada. Cancelando colocación.");
                 Destroy(obj);
                 return;
             }
@@ -471,9 +471,9 @@ public class InteractionController : MonoBehaviour
         if (spawner == null)
         {
             // Evitar duplicados o instancias sin referencias
-            Debug.LogError("[ApplyPlacement] ERROR: No se encontró CatSpawner en la escena. " +
-                           "Debe existir uno activo antes de iniciar el juego. " +
-                           "Verifica que la escena principal (SampleAICatsScene) contenga el objeto CatSpawner y esté activo.");
+            //Debug.LogError("[ApplyPlacement] ERROR: No se encontró CatSpawner en la escena. " +
+                          // "Debe existir uno activo antes de iniciar el juego. " +
+                          // "Verifica que la escena principal (SampleAICatsScene) contenga el objeto CatSpawner y esté activo.");
 
             return; //  Salimos sin intentar crear uno vacío
         }
@@ -481,15 +481,15 @@ public class InteractionController : MonoBehaviour
         // Si el spawner existe, aseguramos que esté activo y listo
         if (!spawner.gameObject.activeSelf)
         {
-            Debug.LogWarning("[ApplyPlacement] CatSpawner estaba desactivado, reactivando...");
+            //Debug.LogWarning("[ApplyPlacement] CatSpawner estaba desactivado, reactivando...");
             spawner.gameObject.SetActive(true);
         }
 
         // Activamos el spawner normalmente... Si le da la gana de activarse por fin!
         spawner.ActivateSpawner();
-        Debug.Log("[ApplyPlacement] CatSpawner encontrado y activado correctamente.");
+        //Debug.Log("[ApplyPlacement] CatSpawner encontrado y activado correctamente.");
 
-        Debug.Log("[ApplyPlacement] Objeto colocado correctamente.");
+        //Debug.Log("[ApplyPlacement] Objeto colocado correctamente.");
     }
 
     /// <summary>
@@ -562,7 +562,7 @@ public class InteractionController : MonoBehaviour
 
         if (blockingCount > 0)
         {
-            Debug.Log("[TryPlaceOnGhost] Colisión con " + blockingCount + " objetos.");
+           // Debug.Log("[TryPlaceOnGhost] Colisión con " + blockingCount + " objetos.");
             return false;
         }
 
