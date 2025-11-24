@@ -4636,7 +4636,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatSpawner
   catPrefabs:
-  - {fileID: 141373326842552989, guid: 29eb989b6396cb944b995653f060014a, type: 3}
+  - {fileID: 8046978971937790743, guid: 72485161a8fceda45916f2c8db5cf8ff, type: 3}
   playerMetrics: {fileID: 217998509}
   maxCats: 5
   checkInterval: 5
@@ -5091,7 +5091,7 @@ PrefabInstance:
     - target: {fileID: 3320827692650161358, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: prefabToGive
       value: 
-      objectReference: {fileID: 5710528604008424672, guid: 8453fbf443587434ba304056f27097fb, type: 3}
+      objectReference: {fileID: 3171800363580376950, guid: 947aba84fcb124943a3b5d2a409f765a, type: 3}
     - target: {fileID: 8428671193802111617, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

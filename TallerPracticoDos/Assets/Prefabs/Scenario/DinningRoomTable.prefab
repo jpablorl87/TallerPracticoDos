@@ -1,12 +1,100 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &4899553914869520817
+--- !u!1 &3171800363580376950
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3674235104589924950}
+  - component: {fileID: 1556635584028801129}
+  - component: {fileID: 6425728757918677094}
+  - component: {fileID: 8676389756028081954}
+  m_Layer: 6
+  m_Name: DinningRoomTable
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3674235104589924950
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3171800363580376950}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4259290707619069007}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1556635584028801129
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3171800363580376950}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 4, y: 2, z: 3.8}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6425728757918677094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3171800363580376950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ae6bf4ee598ac4e9aee493e240638a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SelectableObject
+  allowedSurface: 0
+  placementOrientation: 0
+  canBeDecorated: 0
+  allowedDecorationTags: []
+--- !u!114 &8676389756028081954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3171800363580376950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14e84deb3af4a3c47abdd45991a6aaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DestructibleObject
+  maxHits: 2
+  hitEffect: {fileID: 0}
+  destroyEffect: {fileID: 0}
+  destroyGameObject: 1
+--- !u!1001 &4365873879747189668
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 3674235104589924950}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
       propertyPath: m_LocalScale.x
@@ -26,7 +114,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -62,7 +150,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
       propertyPath: m_Name
-      value: Comedor2
+      value: 'comedor '
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
       propertyPath: m_Layer
@@ -71,72 +159,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7317537417496371472}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 899067522477034278}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 9167633270350860213}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
---- !u!1 &5710528604008424672 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
-  m_PrefabInstance: {fileID: 4899553914869520817}
+--- !u!4 &4259290707619069007 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 290b966accd05a64c8d9481f6d9d8f4d, type: 3}
+  m_PrefabInstance: {fileID: 4365873879747189668}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &7317537417496371472
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5710528604008424672}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 76.563416, y: 84.54748, z: 3.6551597}
-  m_Center: {x: 0.000013893032, y: 0.0000043562886, z: 1.8172773}
---- !u!114 &899067522477034278
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5710528604008424672}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48ae6bf4ee598ac4e9aee493e240638a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SelectableObject
-  allowedSurface: 0
-  placementOrientation: 0
-  canBeDecorated: 0
-  allowedDecorationTags: []
---- !u!114 &9167633270350860213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5710528604008424672}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14e84deb3af4a3c47abdd45991a6aaae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DestructibleObject
-  maxHits: 2
-  hitEffect: {fileID: 0}
-  destroyEffect: {fileID: 0}
-  destroyGameObject: 1
