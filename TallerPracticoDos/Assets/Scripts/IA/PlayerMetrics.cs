@@ -35,7 +35,7 @@ public class PlayerMetrics : MonoBehaviour
         lastUpdateTime = Time.time;
         float normalizedCoins = Mathf.Clamp01(coinsEarned / 100f);
         performanceScore = Mathf.Lerp(performanceScore, normalizedCoins, smoothing);
-        Debug.Log($"[PlayerMetrics] Nueva puntuación: {performanceScore:F2}");
+        //Debug.Log($"[PlayerMetrics] Nueva puntuación: {performanceScore:F2}");
     }
 
     /// <summary>
