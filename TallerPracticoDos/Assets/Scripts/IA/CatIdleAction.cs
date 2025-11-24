@@ -27,7 +27,7 @@ public class CatIdleAction : GOAPAction
         if (timer >= idleTime)
         {
             IsDone = true;
-            Debug.Log($"[CatIdleAction] {agent.name} terminó idle ({idleTime:F1}s).");
+            //Debug.Log($"[CatIdleAction] {agent.name} terminó idle ({idleTime:F1}s).");
         }
 
         return true;
