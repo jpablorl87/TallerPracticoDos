@@ -57,7 +57,7 @@ public class MiniGameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[MiniGameManager] CurrencyManager no disponible al finalizar minijuego.");
+            //Debug.LogWarning("[MiniGameManager] CurrencyManager no disponible al finalizar minijuego.");
         }
 
         SceneManager.LoadScene(mainSceneName);
