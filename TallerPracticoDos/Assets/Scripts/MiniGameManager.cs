@@ -28,6 +28,21 @@ public class MiniGameManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        AudioManager.OnMiniGameMusic += PlayMusic;
+        AudioManager.OnEnemyHitSound += PlayHitSound;
+    }
+    private void Start()
+    {
+        AudioManager.Instance.PlayMiniGameMusic();
+    }
+    private void PlayMusic()
+    {
+        Debug.Log("[MiniGameManager] Reproduciendo música del minijuego");
+    }
+
+    private void PlayHitSound()
+    {
+        Debug.Log("[MiniGameManager] Sonido de hit del minijuego");
     }
     /// <summary>
     /// Llama este método para iniciar un minijuego por nombre de escena.
@@ -61,6 +76,11 @@ public class MiniGameManager : MonoBehaviour
         }
 
         SceneManager.LoadScene(mainSceneName);
+    }
+    private void OnDestroy()
+    {
+        AudioManager.OnMiniGameMusic -= PlayMusic;
+        AudioManager.OnEnemyHitSound -= PlayHitSound;
     }
 
 }

@@ -31,6 +31,7 @@ public abstract class HuntEnemyBase : MonoBehaviour
             return;
 
         TheHuntGameManager.Instance.AddCoins(coinsWorth);
+        AudioManager.Instance.PlayEnemyHitSound();
 
         // En lugar de destruir inmediatamente, podrías hacer pooling
         Destroy(gameObject);

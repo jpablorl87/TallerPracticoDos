@@ -38,8 +38,17 @@ public class TheHuntGameManager : MonoBehaviour
             return;
         }
         Instance = this;
+        AudioManager.OnMiniGameMusic += OnMiniMusic;
+    }
+    private void OnDestroy()
+    {
+        AudioManager.OnMiniGameMusic -= OnMiniMusic;
     }
 
+    private void OnMiniMusic()
+    {
+        Debug.Log("[HuntGame] Música del minijuego");
+    }
     private void Start()
     {
         // Iniciar el minijuego
