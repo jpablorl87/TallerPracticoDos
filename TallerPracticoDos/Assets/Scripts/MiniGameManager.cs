@@ -74,7 +74,7 @@ public class MiniGameManager : MonoBehaviour
         {
             //Debug.LogWarning("[MiniGameManager] CurrencyManager no disponible al finalizar minijuego.");
         }
-
+        Time.timeScale = 1f;//No más Pablonadas!
         SceneManager.LoadScene(mainSceneName);
     }
     private void OnDestroy()

@@ -26,6 +26,7 @@ public class TheHuntGameManager : MonoBehaviour
     public static TheHuntGameManager Instance { get; private set; }
 
     private int coins = 0;        // Monedas acumuladas en este juego
+    public int Coins => coins;               // propiedad de sólo lectura para obtener el valor actual
     private float timeLeft;       // Tiempo restante
     public bool GameIsRunning { get; private set; } = false;
 
@@ -106,7 +107,7 @@ public class TheHuntGameManager : MonoBehaviour
     /// Llamado al presionar "Continue" en el panel final.
     /// Pasa las monedas al sistema general y regresa a la escena principal.
     /// </summary>
-    private void OnContinuePressed()
+    public void OnContinuePressed()
     {
         // Solo llama al flujo central que maneja monedas y retorno de escena
         MiniGameManager.Instance.FinishMiniGame(coins);
