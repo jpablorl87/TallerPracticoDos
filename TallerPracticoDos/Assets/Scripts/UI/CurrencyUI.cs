@@ -1,50 +1,50 @@
 using UnityEngine;
 using TMPro;
 
-/// <summary>
-/// Componente UI que muestra la cantidad actual de monedas en pantalla.
-/// Escucha los cambios del CurrencyManager para actualizar en tiempo real.
-/// </summary>
 public class CurrencyUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text coinsText;
 
     private void OnEnable()
     {
+        // Asegurar que no quede "NewText" si CurrencyManager aún no existe
+        if (coinsText != null)
+            coinsText.text = "0";
+
+        // Si ya existe CurrencyManager, suscribir y actualizar inmediatamente
         if (CurrencyManager.Instance != null)
         {
             CurrencyManager.Instance.OnCoinsChanged += UpdateUI;
+            UpdateUI();
         }
-        UpdateUI();  // Mostrar inmediatamente
+        else
+        {
+            // Esperar a que el manager exista
+            StartCoroutine(WaitForManager());
+        }
     }
 
     private void OnDisable()
     {
         if (CurrencyManager.Instance != null)
-        {
             CurrencyManager.Instance.OnCoinsChanged -= UpdateUI;
-        }
+    }
+
+    private System.Collections.IEnumerator WaitForManager()
+    {
+        while (CurrencyManager.Instance == null)
+            yield return null;
+
+        CurrencyManager.Instance.OnCoinsChanged += UpdateUI;
+        UpdateUI();
     }
 
     /// <summary>
-    /// Actualiza el texto de monedas con el valor actual.
+    /// Actualiza el texto con el valor actual del CurrencyManager.
     /// </summary>
-    public void UpdateUI()
+    private void UpdateUI()
     {
         if (coinsText != null && CurrencyManager.Instance != null)
-        {
             coinsText.text = CurrencyManager.Instance.Coins.ToString();
-        }
-    }
-
-    /// <summary>
-    /// Sobrecarga que permite ser llamada con el parámetro del evento.
-    /// </summary>
-    private void UpdateUI(int newCoins)
-    {
-        if (coinsText != null)
-        {
-            coinsText.text = newCoins.ToString();
-        }
     }
 }

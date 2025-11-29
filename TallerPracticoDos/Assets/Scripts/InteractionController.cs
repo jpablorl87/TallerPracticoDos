@@ -48,6 +48,10 @@ public class InteractionController : MonoBehaviour
         inputActions.Gameplay.Tap.performed -= OnTap;
         inputActions.Gameplay.Disable();
     }
+    private void Start()
+    {
+
+    }
     private void Update()
     {
         if (Keyboard.current.spaceKey.wasPressedThisFrame)

@@ -7,6 +7,7 @@ TagManager:
   - BallDecoration
   - Floor
   - Wall
+  - PauseMenu
   layers:
   - Default
   - TransparentFX

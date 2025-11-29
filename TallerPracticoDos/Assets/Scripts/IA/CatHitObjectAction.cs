@@ -102,7 +102,11 @@ public class CatHitObjectAction : GOAPAction
             animator?.SetTrigger("Idle");
             return true;
         }
-
+        //Sounds
+        if (Random.value < 0.001f)
+        {
+            AudioManager.Instance?.PlayCatMeow();
+        }
         lookTimer += Time.deltaTime;
         if (lookTimer >= lookBeforeAttack && Time.time - lastAttackTime >= attackCooldown)
         {
@@ -112,6 +116,8 @@ public class CatHitObjectAction : GOAPAction
 
             animator?.SetTrigger("Attack");
             target.TakeHit();
+            //Sounds
+            AudioManager.Instance?.PlayCatHiss();
 
             //Debug.Log($"[CatHitObjectAction] {actor.name} golpeó {target.name} (hit {localHits})");
 
@@ -119,6 +125,8 @@ public class CatHitObjectAction : GOAPAction
             {
                 //Debug.Log($"[CatHitObjectAction] {actor.name} destruyó {target.name}");
                 IsDone = true;
+                //Sounds
+                AudioManager.Instance?.PlayCatPurr();
 
                 var catAI = actor.GetComponent<CatAI>();
                 if (catAI != null)
