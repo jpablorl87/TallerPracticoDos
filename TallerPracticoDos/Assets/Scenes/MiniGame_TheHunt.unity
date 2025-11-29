@@ -1152,9 +1152,8 @@ MonoBehaviour:
   spawnArea: {fileID: 1592236701}
   spawnInterval: 1
   enemyPrefabs:
-  - {fileID: 1677264204246199321, guid: 28698bf8948f287408833d95c72794e3, type: 3}
-  - {fileID: 3920655374467737207, guid: 4ec1f595a36cbae46ae719ab6b806c60, type: 3}
-  - {fileID: 1374668285967764166, guid: 6d019d5db75e96a4b9bfcd390aad22e0, type: 3}
+  - {fileID: 881828223984848637, guid: 5f21bf6f4c41c194091e01db83246bb8, type: 3}
+  - {fileID: 4014412407152239125, guid: 6aaec7b4096487c43b75dee529ae8d77, type: 3}
 --- !u!1 &1592236700
 GameObject:
   m_ObjectHideFlags: 0
