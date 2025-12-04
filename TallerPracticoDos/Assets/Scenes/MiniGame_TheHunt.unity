@@ -1056,10 +1056,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2669521893808596933, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3542126050340711637, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 93.5
@@ -1100,37 +1096,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3724739270215767169, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3878514767681189484, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
       propertyPath: m_Name
       value: PauseMenu
-      objectReference: {fileID: 0}
-    - target: {fileID: 3878514767681189484, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4660218301105974622, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4752949363041087164, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5231107114934672773, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7897716288655876426, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8250138943936889373, guid: 31221c1a7d6b53348a59d9ef4478f07c, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
