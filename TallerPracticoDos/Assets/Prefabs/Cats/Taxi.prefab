@@ -135,7 +135,7 @@ MonoBehaviour:
   curiosity: 1
   aggression: 1
   affection: 1
-  favoriteObjectName: 
+  favoriteObjectName: SampleTree2
 --- !u!114 &8816802578728288572
 MonoBehaviour:
   m_ObjectHideFlags: 0
