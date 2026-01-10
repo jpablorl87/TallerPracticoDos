@@ -894,6 +894,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -174.9099
       objectReference: {fileID: 0}
+    - target: {fileID: 7090283415549530484, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b48dcfdc59263b1498dd33478337c476, type: 3}
     - target: {fileID: 7772945205889308561, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: m_text
       value: 5 Coins
@@ -4306,7 +4310,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.033333335
+  m_VoxelSize: 0.1
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 1c211cb9650246c4f8f0a01b80a0dd3d, type: 2}
   m_BuildHeightMesh: 0
@@ -6277,6 +6281,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -174.9099
       objectReference: {fileID: 0}
+    - target: {fileID: 7090283415549530484, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: a931cd4268256944ba4dc2c9f6d72d57, type: 3}
     - target: {fileID: 7772945205889308561, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: m_text
       value: 2 Coins
@@ -6918,8 +6926,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CatSpawner
   catPrefabs:
-  - {fileID: 141373326842552989, guid: 29eb989b6396cb944b995653f060014a, type: 3}
-  - {fileID: 1836459475128917404, guid: e77b7153cf6eb2741a95296220786126, type: 3}
+  - {fileID: 6067677302020667576, guid: 051e28a63a2df7e44aef3b170c0d9365, type: 3}
+  - {fileID: 7459900123010923880, guid: 0eaafe5a9fdb21b48b77b3e2c0e0fba8, type: 3}
+  - {fileID: 7971841325593125493, guid: 9edcdc0cec36269469193b2d41a16363, type: 3}
+  - {fileID: 6934668735239052293, guid: 132e169386754b94b82822186e794c3b, type: 3}
   playerMetrics: {fileID: 217998509}
   maxCats: 5
   checkInterval: 5
@@ -7718,7 +7728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2735685498630452225, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: m_Name
-      value: DinningRoomTable
+      value: Table
       objectReference: {fileID: 0}
     - target: {fileID: 3320827692650161358, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: buyButton
@@ -7727,7 +7737,7 @@ PrefabInstance:
     - target: {fileID: 3320827692650161358, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: prefabToGive
       value: 
-      objectReference: {fileID: 3171800363580376950, guid: 947aba84fcb124943a3b5d2a409f765a, type: 3}
+      objectReference: {fileID: 4395832084363908129, guid: 09457d97a71853840859845d557b505d, type: 3}
     - target: {fileID: 5192165822853781706, guid: af5c3fe6834101f4e8b58c9553275cc7, type: 3}
       propertyPath: m_SizeDelta.x
       value: 358.05

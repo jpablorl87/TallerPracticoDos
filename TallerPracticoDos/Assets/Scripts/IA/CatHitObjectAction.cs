@@ -79,12 +79,14 @@ public class CatHitObjectAction : GOAPAction
         if (!agent.isOnNavMesh) return false;
 
         float distance = Vector3.Distance(actor.transform.position, target.transform.position);
+        bool isMoving = distance > attackRange;
+        animator.SetBool("IsWalking", isMoving);
         agent.stoppingDistance = attackRange;
         agent.SetDestination(target.transform.position);
 
         if (distance > attackRange)
         {
-            animator?.SetTrigger("Walk");
+            //animator?.SetTrigger("Walk");
             return true;
         }
 
@@ -99,7 +101,7 @@ public class CatHitObjectAction : GOAPAction
         float angle = Vector3.Angle(actor.transform.forward, dir);
         if (angle > attackAngleTolerance)
         {
-            animator?.SetTrigger("Idle");
+            //animator?.SetTrigger("Idle");
             return true;
         }
         //Sounds
