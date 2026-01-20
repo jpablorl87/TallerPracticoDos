@@ -84,9 +84,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14e84deb3af4a3c47abdd45991a6aaae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DestructibleObject
-  maxHits: 3
+  maxHits: 1
   hitEffect: {fileID: 0}
-  destroyEffect: {fileID: 0}
+  destroyEffect: {fileID: 5311197564583167592, guid: 88f8305044eb7f744ba9d620382dda26, type: 3}
   destroyGameObject: 1
 --- !u!1001 &2546780298832748604
 PrefabInstance:

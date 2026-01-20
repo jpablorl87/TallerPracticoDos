@@ -79,7 +79,13 @@ public class CatHitObjectAction : GOAPAction
         if (!agent.isOnNavMesh) return false;
 
         float distance = Vector3.Distance(actor.transform.position, target.transform.position);
-        bool isMoving = distance > attackRange;
+        /*bool isMoving = distance > attackRange;
+        animator.SetBool("IsWalking", isMoving);*/
+        bool isMoving =
+        agent.hasPath &&
+        !agent.pathPending &&
+        agent.velocity.sqrMagnitude > 0.01f;
+
         animator.SetBool("IsWalking", isMoving);
         agent.stoppingDistance = attackRange;
         agent.SetDestination(target.transform.position);
